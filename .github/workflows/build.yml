@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  admin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,3 +66,31 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
+
+  storefront:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: storefront
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter analyze
+
+      - run: flutter test
+
+      - name: Build website
+        run: flutter build web --release --no-web-resources-cdn
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storefront-web
+          path: storefront/build/web

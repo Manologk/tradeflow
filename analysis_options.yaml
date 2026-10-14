@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - build/**
     - android/**
+    - storefront/**
 
 formatter:
   page_width: 110
