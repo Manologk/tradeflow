@@ -8,6 +8,7 @@ import '../../data/providers.dart';
 import '../../data/purchase_repository.dart';
 import '../shipping/bill_edit_screen.dart';
 import '../shipping/shipments_view.dart';
+import 'product_sheet.dart';
 import 'purchase_detail_screen.dart';
 import 'purchase_edit_screen.dart';
 import 'purchase_labels.dart';
@@ -168,11 +169,6 @@ class _ProductList extends ConsumerWidget {
 
   final String query;
 
-  Future<void> _rename(BuildContext context, WidgetRef ref, Product product) async {
-    final name = await promptForText(context, title: 'Rename product', label: 'Name', initial: product.name);
-    if (name != null) await ref.read(purchaseRepositoryProvider).renameProduct(product.id, name);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final all = ref.watch(productsProvider).value;
@@ -202,7 +198,7 @@ class _ProductList extends ConsumerWidget {
                 if (summary.unitsOnTheWay > 0) '${summary.unitsOnTheWay} on the way',
               ].join(' · '),
             ),
-            onTap: () => _rename(context, ref, summary.product),
+            onTap: () => showProductSheet(context, summary.product),
           ),
       ],
     );

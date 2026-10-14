@@ -2,7 +2,19 @@ import 'package:drift/drift.dart';
 
 import 'database.dart';
 
-enum MovementKind { purchase, shipping, pickup, salePayment, expense, transferOut, transferIn, adjustment }
+enum MovementKind {
+  purchase,
+  shipping,
+  pickup,
+  salePayment,
+  expense,
+  transferOut,
+  transferIn,
+  adjustment,
+  refund,
+  compensation,
+  saleRefund,
+}
 
 /// One change to a money place's balance.
 class Movement {
@@ -100,6 +112,13 @@ class MoneyRepository {
     SELECT 'adjustment', bc.id, bc.checked_at, bc.actual_zmw - bc.expected_zmw, bc.money_place_id, bc.gap_label, NULL
     FROM balance_checks bc
     WHERE bc.store_id = ?1 AND bc.deleted_at IS NULL AND bc.actual_zmw != bc.expected_zmw
+    UNION ALL
+    SELECT CASE a.kind WHEN 'saleReturn' THEN 'saleRefund' ELSE a.kind END, a.id, a.occurred_at,
+      CASE a.kind WHEN 'saleReturn' THEN -a.amount_zmw ELSE a.amount_zmw END, a.money_place_id,
+      COALESCE(a.purchase_id, a.sale_id), NULL
+    FROM adjustments a
+    WHERE a.store_id = ?1 AND a.deleted_at IS NULL AND a.money_place_id IS NOT NULL AND a.amount_zmw != 0
+      AND a.kind IN ('refund', 'compensation', 'saleReturn')
   ''';
 
   Set<ResultSetImplementation> get _sources => {
@@ -117,6 +136,7 @@ class MoneyRepository {
     db.transfers,
     db.moneyPlaces,
     db.balanceChecks,
+    db.adjustments,
   };
 
   Selectable<Movement> _movements() => db

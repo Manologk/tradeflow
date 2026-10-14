@@ -5,6 +5,7 @@ import '../domain/fifo.dart';
 
 import 'database.dart';
 import 'money_repository.dart';
+import 'problems_repository.dart';
 import 'purchase_repository.dart';
 import 'settings_repository.dart';
 import 'sales_repository.dart';
@@ -128,4 +129,22 @@ final lastBalanceCheckProvider = StreamProvider<DateTime?>(
 
 final saleExpensesProvider = StreamProvider.family<List<Expense>, String>(
   (ref, saleId) => ref.watch(moneyRepositoryProvider).watchSaleExpenses(saleId),
+);
+
+final problemsRepositoryProvider = Provider<ProblemsRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return ProblemsRepository(ref.watch(databaseProvider), store.id);
+});
+
+final purchaseAdjustmentsProvider = StreamProvider.family<List<Adjustment>, String>(
+  (ref, purchaseId) => ref.watch(problemsRepositoryProvider).watchPurchaseAdjustments(purchaseId),
+);
+
+final saleAdjustmentsProvider = StreamProvider.family<List<Adjustment>, String>(
+  (ref, saleId) => ref.watch(problemsRepositoryProvider).watchSaleAdjustments(saleId),
+);
+
+final writeOffsProvider = StreamProvider.family<List<Adjustment>, String>(
+  (ref, productId) => ref.watch(problemsRepositoryProvider).watchWriteOffs(productId),
 );

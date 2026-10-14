@@ -26,6 +26,7 @@ class StockRepository {
           db.openingStockItems,
           db.sales,
           db.saleItems,
+          db.adjustments,
         ]),
       )
       .map((_) => null)
@@ -118,6 +119,19 @@ class StockRepository {
           );
         }(),
     ];
+    final writeOffs =
+        await (db.select(db.adjustments)..where(
+              (a) =>
+                  a.storeId.equals(storeId) &
+                  a.deletedAt.isNull() &
+                  a.kind.equalsValue(AdjustmentKind.writeOff),
+            ))
+            .get();
+    // Written-off units leave stock like a sale; their cost is the loss.
+    demands.addAll([
+      for (final w in writeOffs)
+        StockDemand(id: w.id, productId: w.productId!, at: w.occurredAt, qty: w.qty ?? 0),
+    ]);
     return fifo(batches: batches, demands: demands);
   }
 }

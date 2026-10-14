@@ -467,11 +467,27 @@ class ShippingRepository {
               ..where((i) => i.storeId.equals(storeId) & i.deletedAt.isNull())
               ..orderBy([(i) => OrderingTerm(expression: i.createdAt)]))
             .get();
+    // Partial refunds lower what the items cost. (A whole-order refund takes
+    // the purchase out of stock instead; see ProblemsRepository.)
+    final refunds =
+        await (db.select(db.adjustments)..where(
+              (a) =>
+                  a.storeId.equals(storeId) &
+                  a.deletedAt.isNull() &
+                  a.kind.equalsValue(AdjustmentKind.refund) &
+                  a.reason.equals('partial'),
+            ))
+            .get();
+    final refundedZmw = <String, int>{};
+    for (final r in refunds) {
+      refundedZmw.update(r.purchaseId!, (v) => v + r.amountZmw, ifAbsent: () => r.amountZmw);
+    }
+
     final costItems = <CostItem>[];
     for (final purchase in purchases) {
       final own = items.where((i) => i.purchaseId == purchase.id).toList();
       final costs = itemPurchaseCosts(
-        paidZmw: purchase.paidZmw,
+        paidZmw: purchase.paidZmw - (refundedZmw[purchase.id] ?? 0),
         itemValuesCny: [for (final i in own) i.qty * i.unitPriceCny],
       );
       for (final (n, i) in own.indexed) {

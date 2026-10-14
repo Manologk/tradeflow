@@ -9,6 +9,7 @@ import '../../domain/fifo.dart';
 import '../purchases/purchase_detail_screen.dart';
 import '../purchases/purchase_labels.dart';
 import '../money/money_dialogs.dart';
+import '../problems/problem_dialogs.dart';
 import 'payment_dialog.dart';
 import 'sale_edit_screen.dart';
 
@@ -94,6 +95,10 @@ class SaleDetailScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final s = d.summary;
     final fulfilled = d.sale.status == SaleStatus.fulfilled;
+    final returned = d.sale.status == SaleStatus.returned;
+    final refundedToCustomer = (ref.watch(saleAdjustmentsProvider(saleId)).value ?? const <Adjustment>[])
+        .where((a) => a.kind == AdjustmentKind.saleReturn)
+        .fold<int>(0, (sum, a) => sum + a.amountZmw);
     final costs = [for (final i in d.items) ledger?.demandCosts[i.item.id]];
     final totalCost = costs.fold<int>(0, (sum, c) => sum + (c?.costZmw ?? 0));
     final incomplete = costs.any((c) => c != null && !c.isComplete);
@@ -113,8 +118,16 @@ class SaleDetailScreen extends ConsumerWidget {
                     .push(MaterialPageRoute<void>(builder: (_) => SaleEditScreen(existing: d))),
           ),
           PopupMenuButton<String>(
-            onSelected: (_) => _delete(context, ref),
-            itemBuilder: (_) => const [PopupMenuItem(value: 'delete', child: Text('Delete'))],
+            onSelected: (action) => switch (action) {
+              'return' => showReturnDialog(context, saleId: saleId, paidZmw: s.paidZmw),
+              'undoReturn' => ref.read(problemsRepositoryProvider).undoReturn(saleId),
+              _ => _delete(context, ref),
+            },
+            itemBuilder: (_) => [
+              if (fulfilled) const PopupMenuItem(value: 'return', child: Text('Customer returned it…')),
+              if (returned) const PopupMenuItem(value: 'undoReturn', child: Text('Undo return')),
+              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+            ],
           ),
         ],
       ),
@@ -144,6 +157,17 @@ class SaleDetailScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 12),
+          if (returned)
+            Card(
+              color: theme.colorScheme.errorContainer,
+              child: ListTile(
+                leading: const Icon(Icons.assignment_return_outlined),
+                title: const Text('Returned by the customer'),
+                subtitle: Text(
+                  refundedToCustomer > 0 ? 'Refunded ${Money(refundedToCustomer)}' : 'No money refunded',
+                ),
+              ),
+            ),
           Text('Items', style: theme.textTheme.titleMedium),
           for (final (i, item) in d.items.indexed)
             ListTile(

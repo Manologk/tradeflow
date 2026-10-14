@@ -240,7 +240,8 @@ class PurchaseRepository {
       SELECT pr.*,
         (SELECT COALESCE(SUM(i.qty), 0) FROM purchase_items i
            JOIN purchases p ON p.id = i.purchase_id
-           WHERE i.product_id = pr.id AND i.deleted_at IS NULL AND p.deleted_at IS NULL) AS bought,
+           WHERE i.product_id = pr.id AND i.deleted_at IS NULL AND p.deleted_at IS NULL
+             AND p.status NOT IN ('refunded', 'lost')) AS bought,
         (SELECT COALESCE(SUM(i.qty), 0) FROM purchase_items i
            JOIN purchases p ON p.id = i.purchase_id
            WHERE i.product_id = pr.id AND i.deleted_at IS NULL AND p.deleted_at IS NULL

@@ -152,6 +152,9 @@ class _MovementTile extends ConsumerWidget {
       ),
       MovementKind.transferOut => (Icons.north_east, 'Moved to ${m.label}'),
       MovementKind.transferIn => (Icons.south_west, 'Moved from ${m.label}'),
+      MovementKind.refund => (Icons.undo, 'Refund from seller'),
+      MovementKind.compensation => (Icons.report_outlined, 'Compensation for lost parcel'),
+      MovementKind.saleRefund => (Icons.assignment_return_outlined, 'Refund to customer'),
       MovementKind.adjustment => (
         Icons.rule,
         gapLabels[BalanceGapLabel.values.byName(m.label ?? 'unrecorded')] ?? 'Balance check',
@@ -170,6 +173,11 @@ class _MovementTile extends ConsumerWidget {
         open(BillDetailScreen(billId: m.id));
       case MovementKind.salePayment:
         if (m.detail != null) open(SaleDetailScreen(saleId: m.detail!));
+      case MovementKind.refund || MovementKind.compensation:
+        // For these the label carries the purchase id.
+        if (m.label != null) open(PurchaseDetailScreen(purchaseId: m.label!));
+      case MovementKind.saleRefund:
+        if (m.label != null) open(SaleDetailScreen(saleId: m.label!));
       case MovementKind.pickup:
         break;
       case MovementKind.expense:

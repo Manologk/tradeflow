@@ -61,7 +61,8 @@ class SaleSummary {
   final int totalZmw;
   final int paidZmw;
 
-  int get owedZmw => totalZmw - paidZmw;
+  /// Nothing is owed on a returned sale.
+  int get owedZmw => sale.status == SaleStatus.returned ? 0 : totalZmw - paidZmw;
   bool get isPendingPreOrder => sale.kind == SaleKind.preOrder && sale.status == SaleStatus.pending;
 
   bool matches(String query) {

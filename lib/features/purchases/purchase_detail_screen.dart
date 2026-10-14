@@ -6,6 +6,7 @@ import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/purchase_repository.dart';
 import '../../domain/costing.dart';
+import '../problems/problem_dialogs.dart';
 import 'purchase_edit_screen.dart';
 import 'purchase_labels.dart';
 
@@ -63,7 +64,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
   }
 }
 
-class _DetailView extends StatelessWidget {
+class _DetailView extends ConsumerWidget {
   const _DetailView({
     required this.detail,
     required this.landed,
@@ -79,9 +80,15 @@ class _DetailView extends StatelessWidget {
   final ValueChanged<PurchaseStatus> onStatus;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final p = detail.purchase;
+    final adjustments = ref.watch(purchaseAdjustmentsProvider(p.id)).value ?? const <Adjustment>[];
+    final hasProblem = p.status == PurchaseStatus.refunded || p.status == PurchaseStatus.lost;
+    final landedTotal = detail.items.fold<int>(
+      0,
+      (sum, i) => sum + (landed[i.item.id]?.totalZmw ?? i.costZmw),
+    );
     final rate = effectiveRate(paidZmw: p.paidZmw, totalCny: p.totalCny);
     final canSetStatus = manualPurchaseStatuses.contains(p.status);
     final hasShipping = detail.items.any((i) => (landed[i.item.id]?.shippingZmw ?? 0) > 0);
@@ -92,8 +99,20 @@ class _DetailView extends StatelessWidget {
         actions: [
           IconButton(tooltip: 'Edit', icon: const Icon(Icons.edit_outlined), onPressed: onEdit),
           PopupMenuButton<String>(
-            onSelected: (_) => onDelete(),
-            itemBuilder: (_) => const [PopupMenuItem(value: 'delete', child: Text('Delete'))],
+            onSelected: (action) => switch (action) {
+              'refund' => showRefundDialog(context, purchase: p),
+              'lost' => showLostDialog(context, purchase: p),
+              'undo' => ref.read(problemsRepositoryProvider).undoPurchaseProblems(p.id),
+              _ => onDelete(),
+            },
+            itemBuilder: (_) => [
+              if (!hasProblem) const PopupMenuItem(value: 'refund', child: Text('Refund…')),
+              if (!hasProblem && p.status != PurchaseStatus.collected)
+                const PopupMenuItem(value: 'lost', child: Text('Parcel lost…')),
+              if (adjustments.isNotEmpty)
+                const PopupMenuItem(value: 'undo', child: Text('Undo refund / lost')),
+              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+            ],
           ),
         ],
       ),
@@ -135,6 +154,8 @@ class _DetailView extends StatelessWidget {
               label: Text(purchaseStatusLabels[p.status]!),
             ),
           const SizedBox(height: 24),
+          if (adjustments.isNotEmpty)
+            _ProblemCard(purchase: p, adjustments: adjustments, landedTotal: landedTotal),
           Text('Items', style: theme.textTheme.titleMedium),
           for (final item in detail.items) _ItemTile(item: item, landed: landed[item.item.id]),
           if (!hasShipping)
@@ -212,6 +233,53 @@ class _ItemTile extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProblemCard extends StatelessWidget {
+  const _ProblemCard({required this.purchase, required this.adjustments, required this.landedTotal});
+
+  final Purchase purchase;
+  final List<Adjustment> adjustments;
+  final int landedTotal;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    int sum(AdjustmentKind kind) =>
+        adjustments.where((a) => a.kind == kind).fold(0, (total, a) => total + a.amountZmw);
+    final refunded = sum(AdjustmentKind.refund);
+    final compensation = sum(AdjustmentKind.compensation);
+    final lines = <String>[
+      if (refunded > 0) 'Refunded ${Money(refunded)}',
+      if (purchase.status == PurchaseStatus.lost) 'Parcel lost',
+      if (compensation > 0) 'Compensation ${Money(compensation)}',
+    ];
+    final loss = switch (purchase.status) {
+      PurchaseStatus.refunded => landedTotal - refunded,
+      PurchaseStatus.lost => landedTotal - compensation,
+      _ => null,
+    };
+    return Card(
+      color: theme.colorScheme.errorContainer,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(lines.join(' · '), style: theme.textTheme.titleSmall),
+            if (loss != null && loss > 0)
+              Text(
+                '${purchase.status == PurchaseStatus.refunded ? 'Currency loss' : 'Loss'}: ${Money(loss)}',
+                style: theme.textTheme.bodyMedium,
+              ),
+            if (purchase.status != PurchaseStatus.refunded && refunded > 0)
+              Text('Partial refund: items now cost less.', style: theme.textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }

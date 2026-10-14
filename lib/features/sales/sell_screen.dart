@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/money.dart';
 import '../../core/widgets.dart';
+import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/sales_repository.dart';
 import '../purchases/purchase_labels.dart';
@@ -140,6 +141,7 @@ class _SaleTile extends StatelessWidget {
           shortDate.format(summary.sale.soldAt),
           if (summary.customer != null) summary.customer!.name,
           if (summary.channelName != null) summary.channelName!,
+          if (summary.sale.status == SaleStatus.returned) 'returned',
         ].join(' · '),
       ),
       trailing: Column(
