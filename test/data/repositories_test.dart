@@ -22,9 +22,7 @@ void main() {
         OpeningPlace(name: 'Card', kind: MoneyPlaceKind.card, balanceZmw: 150000),
         OpeningPlace(name: 'Cash', kind: MoneyPlaceKind.cash, balanceZmw: 25050),
       ],
-      stock: const [
-        OpeningStockEntry(productName: 'Earbuds', qty: 4, unitCostZmw: 12000),
-      ],
+      stock: const [OpeningStockEntry(productName: 'Earbuds', qty: 4, unitCostZmw: 12000)],
     );
     return SettingsRepository(db, storeId);
   }
@@ -80,13 +78,21 @@ void main() {
 
   test('money places can be added and edited', () async {
     final settings = await setUpStore();
-    await settings.addMoneyPlace(name: 'Airtel Money', kind: MoneyPlaceKind.mobileMoney, openingBalanceZmw: 5000);
+    await settings.addMoneyPlace(
+      name: 'Airtel Money',
+      kind: MoneyPlaceKind.mobileMoney,
+      openingBalanceZmw: 5000,
+    );
     var places = await settings.watchMoneyPlaces().first;
     expect(places.last.name, 'Airtel Money');
     expect(places.last.sortOrder, 2);
 
-    await settings.updateMoneyPlace(places.last.id,
-        name: 'MTN MoMo', kind: MoneyPlaceKind.mobileMoney, openingBalanceZmw: 7000);
+    await settings.updateMoneyPlace(
+      places.last.id,
+      name: 'MTN MoMo',
+      kind: MoneyPlaceKind.mobileMoney,
+      openingBalanceZmw: 7000,
+    );
     places = await settings.watchMoneyPlaces().first;
     expect((places.last.name, places.last.openingBalanceZmw), ('MTN MoMo', 7000));
   });
@@ -117,11 +123,9 @@ void main() {
   test('foreign keys are enforced', () async {
     await setUpStore();
     await expectLater(
-      db.into(db.lookups).insert(LookupsCompanion.insert(
-            storeId: 'missing-store',
-            kind: LookupKind.channel,
-            name: 'Bad',
-          )),
+      db
+          .into(db.lookups)
+          .insert(LookupsCompanion.insert(storeId: 'missing-store', kind: LookupKind.channel, name: 'Bad')),
       throwsA(isA<SqliteException>()),
     );
   });

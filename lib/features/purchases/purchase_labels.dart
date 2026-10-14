@@ -23,14 +23,14 @@ const manualPurchaseStatuses = [
 ];
 
 IconData purchaseStatusIcon(PurchaseStatus status) => switch (status) {
-      PurchaseStatus.ordered => Icons.receipt_outlined,
-      PurchaseStatus.shipped => Icons.local_shipping_outlined,
-      PurchaseStatus.atAgent => Icons.warehouse_outlined,
-      PurchaseStatus.inTransit => Icons.flight_outlined,
-      PurchaseStatus.collected => Icons.inventory_2_outlined,
-      PurchaseStatus.refunded => Icons.undo,
-      PurchaseStatus.lost => Icons.report_outlined,
-    };
+  PurchaseStatus.ordered => Icons.receipt_outlined,
+  PurchaseStatus.shipped => Icons.local_shipping_outlined,
+  PurchaseStatus.atAgent => Icons.warehouse_outlined,
+  PurchaseStatus.inTransit => Icons.flight_outlined,
+  PurchaseStatus.collected => Icons.inventory_2_outlined,
+  PurchaseStatus.refunded => Icons.undo,
+  PurchaseStatus.lost => Icons.report_outlined,
+};
 
 final shortDate = DateFormat('d MMM yyyy');
 

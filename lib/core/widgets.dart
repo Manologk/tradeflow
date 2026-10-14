@@ -42,8 +42,7 @@ class MoneyField extends StatelessWidget {
 }
 
 /// Minor units from a [MoneyField] controller; empty means zero.
-int moneyFromController(TextEditingController controller) =>
-    Money.parseMinor(controller.text.trim()) ?? 0;
+int moneyFromController(TextEditingController controller) => Money.parseMinor(controller.text.trim()) ?? 0;
 
 /// Asks for a single line of text. Returns null if cancelled or empty.
 Future<String?> promptForText(
@@ -67,10 +66,7 @@ Future<String?> promptForText(
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, controller.text),
-          child: Text(confirmLabel),
-        ),
+        FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: Text(confirmLabel)),
       ],
     ),
   );

@@ -218,8 +218,7 @@ class BalanceChecks extends Table with SyncColumns {
   TextColumn get moneyPlaceId => text().references(MoneyPlaces, #id)();
   IntColumn get actualZmw => integer()();
   IntColumn get expectedZmw => integer()();
-  TextColumn get gapLabel =>
-      textEnum<BalanceGapLabel>().withDefault(const Constant('unrecorded'))();
+  TextColumn get gapLabel => textEnum<BalanceGapLabel>().withDefault(const Constant('unrecorded'))();
 }
 
 /// Stock already held when the store was set up.

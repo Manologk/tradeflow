@@ -1,22 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/costing.dart';
+
 import 'database.dart';
 import 'money_repository.dart';
 import 'purchase_repository.dart';
 import 'settings_repository.dart';
 import 'setup_repository.dart';
+import 'shipping_repository.dart';
 
 /// Overridden in main() (and in tests with an in-memory database).
 final databaseProvider = Provider<AppDatabase>(
   (ref) => throw UnimplementedError('databaseProvider must be overridden'),
 );
 
-final setupRepositoryProvider =
-    Provider((ref) => SetupRepository(ref.watch(databaseProvider)));
+final setupRepositoryProvider = Provider((ref) => SetupRepository(ref.watch(databaseProvider)));
 
-final storeProvider = StreamProvider<Store?>(
-  (ref) => ref.watch(setupRepositoryProvider).watchStore(),
-);
+final storeProvider = StreamProvider<Store?>((ref) => ref.watch(setupRepositoryProvider).watchStore());
 
 /// Only available once setup has created the store.
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
@@ -63,4 +63,22 @@ final productsProvider = StreamProvider<List<ProductSummary>>(
 
 final balancesProvider = StreamProvider<List<PlaceBalance>>(
   (ref) => ref.watch(moneyRepositoryProvider).watchBalances(),
+);
+
+final shippingRepositoryProvider = Provider<ShippingRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return ShippingRepository(ref.watch(databaseProvider), store.id);
+});
+
+final shippingBillsProvider = StreamProvider<List<ShippingBillDetail>>(
+  (ref) => ref.watch(shippingRepositoryProvider).watchBills(),
+);
+
+final collectionsProvider = StreamProvider<List<CollectionSummary>>(
+  (ref) => ref.watch(shippingRepositoryProvider).watchCollections(),
+);
+
+final landedCostsProvider = StreamProvider<Map<String, ItemLandedCost>>(
+  (ref) => ref.watch(shippingRepositoryProvider).watchLandedCosts(),
 );

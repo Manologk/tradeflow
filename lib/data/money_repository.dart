@@ -16,25 +16,31 @@ class MoneyRepository {
   final AppDatabase db;
   final String storeId;
 
-  /// Opening balance minus purchase payments. Sales, shipping, expenses and
-  /// transfers join this sum as their milestones land.
+  /// Opening balance minus purchase, shipping and collection payments.
+  /// Sales, expenses and transfers join this sum as their milestones land.
   Stream<List<PlaceBalance>> watchBalances() {
     final query = db.customSelect(
       '''
       SELECT mp.*,
         mp.opening_balance_zmw
           - (SELECT COALESCE(SUM(p.paid_zmw), 0) FROM purchases p
-               WHERE p.money_place_id = mp.id AND p.deleted_at IS NULL) AS balance
+               WHERE p.money_place_id = mp.id AND p.deleted_at IS NULL)
+          - (SELECT COALESCE(SUM(b.paid_zmw), 0) FROM shipping_bills b
+               WHERE b.money_place_id = mp.id AND b.deleted_at IS NULL)
+          - (SELECT COALESCE(SUM(c.transport_zmw + c.storage_zmw), 0) FROM collections c
+               WHERE c.money_place_id = mp.id AND c.deleted_at IS NULL) AS balance
       FROM money_places mp
       WHERE mp.store_id = ? AND mp.deleted_at IS NULL
       ORDER BY mp.sort_order
       ''',
       variables: [Variable.withString(storeId)],
-      readsFrom: {db.moneyPlaces, db.purchases},
+      readsFrom: {db.moneyPlaces, db.purchases, db.shippingBills, db.collections},
     );
-    return query.watch().map((rows) => [
-          for (final row in rows)
-            PlaceBalance(place: db.moneyPlaces.map(row.data), balanceZmw: row.read<int>('balance')),
-        ]);
+    return query.watch().map(
+      (rows) => [
+        for (final row in rows)
+          PlaceBalance(place: db.moneyPlaces.map(row.data), balanceZmw: row.read<int>('balance')),
+      ],
+    );
   }
 }

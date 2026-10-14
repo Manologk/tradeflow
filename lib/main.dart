@@ -7,8 +7,10 @@ import 'data/providers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(
-    overrides: [databaseProvider.overrideWithValue(AppDatabase.open())],
-    child: const TradeFlowApp(),
-  ));
+  runApp(
+    ProviderScope(
+      overrides: [databaseProvider.overrideWithValue(AppDatabase.open())],
+      child: const TradeFlowApp(),
+    ),
+  );
 }

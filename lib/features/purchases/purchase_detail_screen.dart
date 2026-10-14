@@ -19,8 +19,10 @@ class PurchaseDetailScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete this purchase?'),
-        content: const Text('Use this for a purchase entered by mistake. '
-            'For a refunded order, use Refund instead (coming soon) so the money is tracked.'),
+        content: const Text(
+          'Use this for a purchase entered by mistake. '
+          'For a refunded order, use Refund instead (coming soon) so the money is tracked.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
@@ -37,15 +39,26 @@ class PurchaseDetailScreen extends ConsumerWidget {
     final detail = ref.watch(purchaseDetailProvider(purchaseId));
     return switch (detail) {
       AsyncData(value: final d?) => _DetailView(
-          detail: d,
-          onEdit: () => Navigator.of(context)
-              .push(MaterialPageRoute<void>(builder: (_) => PurchaseEditScreen(existing: d))),
-          onDelete: () => _delete(context, ref),
-          onStatus: (s) => ref.read(purchaseRepositoryProvider).setStatus(purchaseId, s),
-        ),
-      AsyncData() => Scaffold(appBar: AppBar(), body: const Center(child: Text('Purchase not found'))),
-      AsyncError(:final error) => Scaffold(appBar: AppBar(), body: Center(child: Text('$error'))),
-      _ => Scaffold(appBar: AppBar(), body: const Center(child: CircularProgressIndicator())),
+        detail: d,
+        landed: ref.watch(landedCostsProvider).value ?? const {},
+        onEdit: () =>
+            Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (_) => PurchaseEditScreen(existing: d))),
+        onDelete: () => _delete(context, ref),
+        onStatus: (s) => ref.read(purchaseRepositoryProvider).setStatus(purchaseId, s),
+      ),
+      AsyncData() => Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Purchase not found')),
+      ),
+      AsyncError(:final error) => Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text('$error')),
+      ),
+      _ => Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
     };
   }
 }
@@ -53,12 +66,14 @@ class PurchaseDetailScreen extends ConsumerWidget {
 class _DetailView extends StatelessWidget {
   const _DetailView({
     required this.detail,
+    required this.landed,
     required this.onEdit,
     required this.onDelete,
     required this.onStatus,
   });
 
   final PurchaseDetail detail;
+  final Map<String, ItemLandedCost> landed;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final ValueChanged<PurchaseStatus> onStatus;
@@ -69,6 +84,7 @@ class _DetailView extends StatelessWidget {
     final p = detail.purchase;
     final rate = effectiveRate(paidZmw: p.paidZmw, totalCny: p.totalCny);
     final canSetStatus = manualPurchaseStatuses.contains(p.status);
+    final hasShipping = detail.items.any((i) => (landed[i.item.id]?.shippingZmw ?? 0) > 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -120,15 +136,14 @@ class _DetailView extends StatelessWidget {
             ),
           const SizedBox(height: 24),
           Text('Items', style: theme.textTheme.titleMedium),
-          for (final item in detail.items)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(item.product.name),
-              subtitle: Text(
-                '${item.item.qty} × ${Money(item.item.unitPriceCny, Currency.cny)}'
-                ' · ${Money(item.costZmw ~/ item.item.qty)} each before shipping',
+          for (final item in detail.items) _ItemTile(item: item, landed: landed[item.item.id]),
+          if (!hasShipping)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Shipping is added to these costs when you enter the agent\'s bill.',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
-              trailing: Text(Money(item.costZmw).toString()),
             ),
           if (detail.sellerDeliveryCny > 0)
             Text(
@@ -151,6 +166,51 @@ class _DetailView extends StatelessWidget {
             if (p.orderRef != null) Text('Order no. ${p.orderRef}'),
             if (p.notes != null) Text(p.notes!),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ItemTile extends StatelessWidget {
+  const _ItemTile({required this.item, required this.landed});
+
+  final PurchaseItemDetail item;
+  final ItemLandedCost? landed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cost = landed;
+    final qty = item.item.qty;
+    final extras = cost == null ? 0 : cost.shippingZmw + cost.collectionZmw;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(item.product.name, style: theme.textTheme.titleSmall)),
+              Text(
+                cost == null ? Money(item.costZmw).toString() : '${Money(cost.unitZmw)} each',
+                style: theme.textTheme.titleSmall,
+              ),
+            ],
+          ),
+          Text(
+            '$qty × ${Money(item.item.unitPriceCny, Currency.cny)} · paid ${Money(item.costZmw)}',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (cost != null && extras > 0)
+            Text(
+              [
+                if (cost.shippingZmw > 0) 'shipping ${Money(cost.shippingZmw)}',
+                if (cost.collectionZmw > 0) 'pickup ${Money(cost.collectionZmw)}',
+                'landed ${Money(cost.totalZmw)}',
+              ].join(' · '),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+            ),
         ],
       ),
     );

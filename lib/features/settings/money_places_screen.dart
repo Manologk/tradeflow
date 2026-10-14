@@ -94,8 +94,7 @@ class _PlaceDialog extends StatefulWidget {
 class _PlaceDialogState extends State<_PlaceDialog> {
   final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.place?.name ?? '');
-  late final _balance =
-      TextEditingController(text: Money.editable(widget.place?.openingBalanceZmw ?? 0));
+  late final _balance = TextEditingController(text: Money.editable(widget.place?.openingBalanceZmw ?? 0));
   late var _kind = widget.place?.kind ?? MoneyPlaceKind.mobileMoney;
 
   @override

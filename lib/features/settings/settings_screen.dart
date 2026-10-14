@@ -15,12 +15,7 @@ class SettingsScreen extends ConsumerWidget {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
 
   Future<void> _renameStore(BuildContext context, WidgetRef ref, Store store) async {
-    final name = await promptForText(
-      context,
-      title: 'Business name',
-      label: 'Name',
-      initial: store.name,
-    );
+    final name = await promptForText(context, title: 'Business name', label: 'Name', initial: store.name);
     if (name != null) await ref.read(setupRepositoryProvider).renameStore(store.id, name);
   }
 

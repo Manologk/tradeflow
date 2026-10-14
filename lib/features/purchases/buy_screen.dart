@@ -6,11 +6,13 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/purchase_repository.dart';
+import '../shipping/bill_edit_screen.dart';
+import '../shipping/shipments_view.dart';
 import 'purchase_detail_screen.dart';
 import 'purchase_edit_screen.dart';
 import 'purchase_labels.dart';
 
-enum _BuyView { purchases, products }
+enum _BuyView { purchases, shipments, products }
 
 class BuyScreen extends ConsumerStatefulWidget {
   const BuyScreen({super.key});
@@ -26,14 +28,21 @@ class _BuyScreenState extends ConsumerState<BuyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: _view == _BuyView.purchases
-          ? FloatingActionButton.extended(
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute<void>(builder: (_) => const PurchaseEditScreen())),
-              icon: const Icon(Icons.add),
-              label: const Text('New purchase'),
-            )
-          : null,
+      floatingActionButton: switch (_view) {
+        _BuyView.purchases => FloatingActionButton.extended(
+          onPressed: () =>
+              Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const PurchaseEditScreen())),
+          icon: const Icon(Icons.add),
+          label: const Text('New purchase'),
+        ),
+        _BuyView.shipments => FloatingActionButton.extended(
+          onPressed: () =>
+              Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const BillEditScreen())),
+          icon: const Icon(Icons.add),
+          label: const Text('Shipping bill'),
+        ),
+        _BuyView.products => null,
+      },
       body: Column(
         children: [
           Padding(
@@ -41,30 +50,34 @@ class _BuyScreenState extends ConsumerState<BuyScreen> {
             child: SegmentedButton<_BuyView>(
               segments: const [
                 ButtonSegment(value: _BuyView.purchases, label: Text('Purchases')),
+                ButtonSegment(value: _BuyView.shipments, label: Text('Shipping')),
                 ButtonSegment(value: _BuyView.products, label: Text('Products')),
               ],
               selected: {_view},
               onSelectionChanged: (s) => setState(() => _view = s.single),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: _view == _BuyView.purchases
-                    ? 'Search item, seller or tracking no.'
-                    : 'Search products',
-                prefixIcon: const Icon(Icons.search),
-                isDense: true,
+          if (_view != _BuyView.shipments)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: _view == _BuyView.purchases
+                      ? 'Search item, seller or tracking no.'
+                      : 'Search products',
+                  prefixIcon: const Icon(Icons.search),
+                  isDense: true,
+                ),
+                onChanged: (v) => setState(() => _query = v),
               ),
-              onChanged: (v) => setState(() => _query = v),
             ),
-          ),
           const SizedBox(height: 8),
           Expanded(
-            child: _view == _BuyView.purchases
-                ? _PurchaseList(query: _query)
-                : _ProductList(query: _query),
+            child: switch (_view) {
+              _BuyView.purchases => _PurchaseList(query: _query),
+              _BuyView.shipments => const ShipmentsView(),
+              _BuyView.products => _ProductList(query: _query),
+            },
           ),
         ],
       ),
@@ -130,8 +143,8 @@ class _PurchaseTile extends StatelessWidget {
     final title = names.isEmpty
         ? 'Purchase'
         : names.length <= 2
-            ? names.join(', ')
-            : '${names.take(2).join(', ')} +${names.length - 2} more';
+        ? names.join(', ')
+        : '${names.take(2).join(', ')} +${names.length - 2} more';
     final subtitle = [
       shortDate.format(p.orderedAt),
       if (summary.platformName != null) summary.platformName!,
@@ -143,8 +156,9 @@ class _PurchaseTile extends StatelessWidget {
       title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(subtitle),
       trailing: Text(Money(p.paidZmw).toString(), style: Theme.of(context).textTheme.titleSmall),
-      onTap: () => Navigator.of(context)
-          .push(MaterialPageRoute<void>(builder: (_) => PurchaseDetailScreen(purchaseId: p.id))),
+      onTap: () =>
+          Navigator.of(context)
+              .push(MaterialPageRoute<void>(builder: (_) => PurchaseDetailScreen(purchaseId: p.id))),
     );
   }
 }
@@ -179,10 +193,12 @@ class _ProductList extends ConsumerWidget {
         for (final summary in matches)
           ListTile(
             title: Text(summary.product.name),
-            subtitle: Text([
-              '${summary.unitsBought} bought',
-              if (summary.openingUnits > 0) '${summary.openingUnits} from opening stock',
-            ].join(' · ')),
+            subtitle: Text(
+              [
+                '${summary.unitsReceived} received',
+                if (summary.unitsOnTheWay > 0) '${summary.unitsOnTheWay} on the way',
+              ].join(' · '),
+            ),
             onTap: () => _rename(context, ref, summary.product),
           ),
       ],

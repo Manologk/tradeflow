@@ -43,10 +43,16 @@ void main() {
         platformId: taobao,
         sellerName: ' Shenzhen Gadgets ',
         orderedAt: DateTime(2026, 10, 1),
-        items: items ??
+        items:
+            items ??
             [
               PurchaseItemDraft(productName: 'Earbuds', qty: 2, unitPriceCny: 5000, cargoTypeId: sensitive),
-              PurchaseItemDraft(productName: ' phone   CASE ', qty: 10, unitPriceCny: 800, cargoTypeId: general),
+              PurchaseItemDraft(
+                productName: ' phone   CASE ',
+                qty: 10,
+                unitPriceCny: 800,
+                cargoTypeId: general,
+              ),
             ],
         sellerDeliveryCny: 1000,
         paidZmw: 70000,
@@ -68,7 +74,10 @@ void main() {
     final products = await purchases.watchProducts().first;
     expect(products.map((p) => p.product.name), ['Earbuds', 'Phone case']);
     final phoneCase = products.firstWhere((p) => p.product.name == 'Phone case');
-    expect((phoneCase.unitsBought, phoneCase.openingUnits), (10, 3));
+    expect(
+      (phoneCase.unitsBought, phoneCase.openingUnits, phoneCase.unitsReceived, phoneCase.unitsOnTheWay),
+      (10, 3, 3, 10),
+    );
   });
 
   test('ZMW paid is split across items by CNY value and sums exactly', () async {
@@ -100,10 +109,21 @@ void main() {
     final before = (await purchases.watchPurchase(id).first)!;
     final earbuds = before.items.first.item;
 
-    await purchases.savePurchase(draft(id: id, items: [
-      PurchaseItemDraft(id: earbuds.id, productName: 'Earbuds', qty: 3, unitPriceCny: 5000, cargoTypeId: sensitive),
-      PurchaseItemDraft(productName: 'Charger', qty: 1, unitPriceCny: 2000, cargoTypeId: sensitive),
-    ]));
+    await purchases.savePurchase(
+      draft(
+        id: id,
+        items: [
+          PurchaseItemDraft(
+            id: earbuds.id,
+            productName: 'Earbuds',
+            qty: 3,
+            unitPriceCny: 5000,
+            cargoTypeId: sensitive,
+          ),
+          PurchaseItemDraft(productName: 'Charger', qty: 1, unitPriceCny: 2000, cargoTypeId: sensitive),
+        ],
+      ),
+    );
     final after = (await purchases.watchPurchase(id).first)!;
     expect(after.items.map((i) => (i.product.name, i.item.qty)), [('Earbuds', 3), ('Charger', 1)]);
     expect(after.items.first.item.id, earbuds.id);

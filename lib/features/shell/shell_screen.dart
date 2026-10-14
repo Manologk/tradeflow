@@ -20,14 +20,21 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   static const _destinations = [
     NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
     NavigationDestination(
-        icon: Icon(Icons.shopping_bag_outlined), selectedIcon: Icon(Icons.shopping_bag), label: 'Buy'),
+      icon: Icon(Icons.shopping_bag_outlined),
+      selectedIcon: Icon(Icons.shopping_bag),
+      label: 'Buy',
+    ),
     NavigationDestination(icon: Icon(Icons.sell_outlined), selectedIcon: Icon(Icons.sell), label: 'Sell'),
     NavigationDestination(
-        icon: Icon(Icons.account_balance_wallet_outlined),
-        selectedIcon: Icon(Icons.account_balance_wallet),
-        label: 'Money'),
+      icon: Icon(Icons.account_balance_wallet_outlined),
+      selectedIcon: Icon(Icons.account_balance_wallet),
+      label: 'Money',
+    ),
     NavigationDestination(
-        icon: Icon(Icons.insights_outlined), selectedIcon: Icon(Icons.insights), label: 'Reports'),
+      icon: Icon(Icons.insights_outlined),
+      selectedIcon: Icon(Icons.insights),
+      label: 'Reports',
+    ),
   ];
 
   @override
@@ -48,8 +55,8 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           IconButton(
             tooltip: 'Settings',
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context)
-                .push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen())),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen())),
           ),
         ],
       ),
@@ -71,8 +78,8 @@ class _ComingSoon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => EmptyState(
-        icon: icon,
-        title: '$title are coming in the next update',
-        message: 'This version sets up your business. Logging starts in the next release.',
-      );
+    icon: icon,
+    title: '$title are coming in the next update',
+    message: 'This version sets up your business. Logging starts in the next release.',
+  );
 }

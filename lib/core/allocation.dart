@@ -11,8 +11,7 @@ List<int> allocate(int total, List<int> weights) {
   }
   final sign = total < 0 ? -1 : 1;
   final amount = total.abs();
-  final effective =
-      weights.every((w) => w == 0) ? List.filled(weights.length, 1) : weights;
+  final effective = weights.every((w) => w == 0) ? List.filled(weights.length, 1) : weights;
   final weightSum = effective.fold<int>(0, (a, b) => a + b);
 
   final parts = <int>[];

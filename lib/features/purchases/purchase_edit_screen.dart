@@ -12,9 +12,9 @@ import 'purchase_labels.dart';
 
 class _ItemRow {
   _ItemRow({this.id, String name = '', String qty = '1', String price = '', this.cargoTypeId})
-      : name = TextEditingController(text: name),
-        qty = TextEditingController(text: qty),
-        price = TextEditingController(text: price);
+    : name = TextEditingController(text: name),
+      qty = TextEditingController(text: qty),
+      price = TextEditingController(text: price);
 
   final String? id;
   final TextEditingController name;
@@ -77,13 +77,15 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
       _moneyPlaceId = p.moneyPlaceId;
       _tracking.addAll(e.trackingNumbers);
       for (final i in e.items) {
-        _items.add(_ItemRow(
-          id: i.item.id,
-          name: i.product.name,
-          qty: '${i.item.qty}',
-          price: Money.editable(i.item.unitPriceCny),
-          cargoTypeId: i.item.cargoTypeId,
-        ));
+        _items.add(
+          _ItemRow(
+            id: i.item.id,
+            name: i.product.name,
+            qty: '${i.item.qty}',
+            price: Money.editable(i.item.unitPriceCny),
+            cargoTypeId: i.item.cargoTypeId,
+          ),
+        );
       }
     } else {
       _items.add(_ItemRow());
@@ -364,8 +366,7 @@ class _ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // An archived cargo type isn't offered; show the default instead.
-    final cargoId =
-        cargoTypes.any((c) => c.id == row.cargoTypeId) ? row.cargoTypeId! : cargoTypes.first.id;
+    final cargoId = cargoTypes.any((c) => c.id == row.cargoTypeId) ? row.cargoTypeId! : cargoTypes.first.id;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(

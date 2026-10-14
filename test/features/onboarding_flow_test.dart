@@ -11,10 +11,9 @@ void main() {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
-      child: const TradeFlowApp(),
-    ));
+    await tester.pumpWidget(
+      ProviderScope(overrides: [databaseProvider.overrideWithValue(db)], child: const TradeFlowApp()),
+    );
     await tester.pumpAndSettle();
 
     // Step 1: business name is required.

@@ -115,11 +115,23 @@ class PurchaseDetail {
 
 /// Product with how many units have been bought so far.
 class ProductSummary {
-  const ProductSummary({required this.product, required this.unitsBought, required this.openingUnits});
+  const ProductSummary({
+    required this.product,
+    required this.unitsBought,
+    required this.unitsCollected,
+    required this.openingUnits,
+  });
 
   final Product product;
   final int unitsBought;
+
+  /// Units from purchases already collected from the agent.
+  final int unitsCollected;
   final int openingUnits;
+
+  /// Units received so far (before sales, which arrive in a later milestone).
+  int get unitsReceived => unitsCollected + openingUnits;
+  int get unitsOnTheWay => unitsBought - unitsCollected;
 }
 
 class PurchaseRepository {
@@ -150,16 +162,18 @@ class PurchaseRepository {
       readsFrom: {db.purchases, db.purchaseItems, db.products, db.trackingNumbers, db.lookups},
     );
     List<String> split(String? s) => s == null || s.isEmpty ? const [] : s.split('\x1f');
-    return query.watch().map((rows) => [
-          for (final row in rows)
-            PurchaseSummary(
-              purchase: db.purchases.map(row.data),
-              platformName: row.readNullable<String>('platform_name'),
-              itemNames: split(row.readNullable<String>('item_names')),
-              units: row.read<int>('units'),
-              trackingNumbers: split(row.readNullable<String>('tracking')),
-            ),
-        ]);
+    return query.watch().map(
+      (rows) => [
+        for (final row in rows)
+          PurchaseSummary(
+            purchase: db.purchases.map(row.data),
+            platformName: row.readNullable<String>('platform_name'),
+            itemNames: split(row.readNullable<String>('item_names')),
+            units: row.read<int>('units'),
+            trackingNumbers: split(row.readNullable<String>('tracking')),
+          ),
+      ],
+    );
   }
 
   Stream<PurchaseDetail?> watchPurchase(String id) {
@@ -169,26 +183,29 @@ class PurchaseRepository {
   }
 
   Future<PurchaseDetail> _detail(Purchase purchase) async {
-    final rows = await (db.select(db.purchaseItems).join([
-      innerJoin(db.products, db.products.id.equalsExp(db.purchaseItems.productId)),
-    ])
-          ..where(db.purchaseItems.purchaseId.equals(purchase.id) & db.purchaseItems.deletedAt.isNull())
-          ..orderBy([OrderingTerm(expression: db.purchaseItems.createdAt)]))
-        .get();
+    final rows =
+        await (db.select(db.purchaseItems).join([
+                innerJoin(db.products, db.products.id.equalsExp(db.purchaseItems.productId)),
+              ])
+              ..where(db.purchaseItems.purchaseId.equals(purchase.id) & db.purchaseItems.deletedAt.isNull())
+              ..orderBy([OrderingTerm(expression: db.purchaseItems.createdAt)]))
+            .get();
     final items = [for (final r in rows) (r.readTable(db.purchaseItems), r.readTable(db.products))];
     final costs = itemPurchaseCosts(
       paidZmw: purchase.paidZmw,
       itemValuesCny: [for (final (item, _) in items) item.qty * item.unitPriceCny],
     );
-    final tracking = await (db.select(db.trackingNumbers)
-          ..where((t) => t.purchaseId.equals(purchase.id) & t.deletedAt.isNull())
-          ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]))
-        .get();
+    final tracking =
+        await (db.select(db.trackingNumbers)
+              ..where((t) => t.purchaseId.equals(purchase.id) & t.deletedAt.isNull())
+              ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]))
+            .get();
     final platform = purchase.platformId == null
         ? null
         : await (db.select(db.lookups)..where((l) => l.id.equals(purchase.platformId!))).getSingleOrNull();
-    final place =
-        await (db.select(db.moneyPlaces)..where((p) => p.id.equals(purchase.moneyPlaceId))).getSingle();
+    final place = await (db.select(
+      db.moneyPlaces,
+    )..where((p) => p.id.equals(purchase.moneyPlaceId))).getSingle();
 
     return PurchaseDetail(
       purchase: purchase,
@@ -204,11 +221,12 @@ class PurchaseRepository {
 
   /// Money place used on the most recent purchase, to pre-select next time.
   Future<String?> lastUsedMoneyPlaceId() async {
-    final last = await (db.select(db.purchases)
-          ..where((p) => p.storeId.equals(storeId) & p.deletedAt.isNull())
-          ..orderBy([(p) => OrderingTerm.desc(p.createdAt)])
-          ..limit(1))
-        .getSingleOrNull();
+    final last =
+        await (db.select(db.purchases)
+              ..where((p) => p.storeId.equals(storeId) & p.deletedAt.isNull())
+              ..orderBy([(p) => OrderingTerm.desc(p.createdAt)])
+              ..limit(1))
+            .getSingleOrNull();
     return last?.moneyPlaceId;
   }
 
@@ -219,6 +237,10 @@ class PurchaseRepository {
         (SELECT COALESCE(SUM(i.qty), 0) FROM purchase_items i
            JOIN purchases p ON p.id = i.purchase_id
            WHERE i.product_id = pr.id AND i.deleted_at IS NULL AND p.deleted_at IS NULL) AS bought,
+        (SELECT COALESCE(SUM(i.qty), 0) FROM purchase_items i
+           JOIN purchases p ON p.id = i.purchase_id
+           WHERE i.product_id = pr.id AND i.deleted_at IS NULL AND p.deleted_at IS NULL
+             AND p.status = 'collected') AS collected,
         (SELECT COALESCE(SUM(o.qty), 0) FROM opening_stock_items o
            WHERE o.product_id = pr.id AND o.deleted_at IS NULL) AS opening
       FROM products pr
@@ -228,14 +250,17 @@ class PurchaseRepository {
       variables: [Variable.withString(storeId)],
       readsFrom: {db.products, db.purchaseItems, db.purchases, db.openingStockItems},
     );
-    return query.watch().map((rows) => [
-          for (final row in rows)
-            ProductSummary(
-              product: db.products.map(row.data),
-              unitsBought: row.read<int>('bought'),
-              openingUnits: row.read<int>('opening'),
-            ),
-        ]);
+    return query.watch().map(
+      (rows) => [
+        for (final row in rows)
+          ProductSummary(
+            product: db.products.map(row.data),
+            unitsBought: row.read<int>('bought'),
+            unitsCollected: row.read<int>('collected'),
+            openingUnits: row.read<int>('opening'),
+          ),
+      ],
+    );
   }
 
   Future<void> renameProduct(String id, String name) =>
@@ -255,32 +280,38 @@ class PurchaseRepository {
 
       final String purchaseId;
       if (draft.id == null) {
-        final row = await db.into(db.purchases).insertReturning(PurchasesCompanion.insert(
-              storeId: storeId,
-              platformId: Value(draft.platformId),
-              sellerName: Value(clean(draft.sellerName)),
-              orderRef: Value(clean(draft.orderRef)),
-              orderedAt: draft.orderedAt,
-              totalCny: draft.totalCny,
-              paidZmw: draft.paidZmw,
-              moneyPlaceId: draft.moneyPlaceId,
-              status: draft.trackingNumbers.isEmpty ? PurchaseStatus.ordered : PurchaseStatus.shipped,
-              notes: Value(clean(draft.notes)),
-            ));
+        final row = await db
+            .into(db.purchases)
+            .insertReturning(
+              PurchasesCompanion.insert(
+                storeId: storeId,
+                platformId: Value(draft.platformId),
+                sellerName: Value(clean(draft.sellerName)),
+                orderRef: Value(clean(draft.orderRef)),
+                orderedAt: draft.orderedAt,
+                totalCny: draft.totalCny,
+                paidZmw: draft.paidZmw,
+                moneyPlaceId: draft.moneyPlaceId,
+                status: draft.trackingNumbers.isEmpty ? PurchaseStatus.ordered : PurchaseStatus.shipped,
+                notes: Value(clean(draft.notes)),
+              ),
+            );
         purchaseId = row.id;
       } else {
         purchaseId = draft.id!;
-        await (db.update(db.purchases)..where((p) => p.id.equals(purchaseId))).write(PurchasesCompanion(
-          platformId: Value(draft.platformId),
-          sellerName: Value(clean(draft.sellerName)),
-          orderRef: Value(clean(draft.orderRef)),
-          orderedAt: Value(draft.orderedAt),
-          totalCny: Value(draft.totalCny),
-          paidZmw: Value(draft.paidZmw),
-          moneyPlaceId: Value(draft.moneyPlaceId),
-          notes: Value(clean(draft.notes)),
-          updatedAt: Value(now),
-        ));
+        await (db.update(db.purchases)..where((p) => p.id.equals(purchaseId))).write(
+          PurchasesCompanion(
+            platformId: Value(draft.platformId),
+            sellerName: Value(clean(draft.sellerName)),
+            orderRef: Value(clean(draft.orderRef)),
+            orderedAt: Value(draft.orderedAt),
+            totalCny: Value(draft.totalCny),
+            paidZmw: Value(draft.paidZmw),
+            moneyPlaceId: Value(draft.moneyPlaceId),
+            notes: Value(clean(draft.notes)),
+            updatedAt: Value(now),
+          ),
+        );
       }
 
       await _saveItems(purchaseId, draft.items, now);
@@ -296,35 +327,42 @@ class PurchaseRepository {
   }
 
   Future<void> _saveItems(String purchaseId, List<PurchaseItemDraft> drafts, DateTime now) async {
-    final existing = await (db.select(db.purchaseItems)
-          ..where((i) => i.purchaseId.equals(purchaseId) & i.deletedAt.isNull()))
-        .get();
+    final existing = await (db.select(
+      db.purchaseItems,
+    )..where((i) => i.purchaseId.equals(purchaseId) & i.deletedAt.isNull())).get();
     final kept = <String>{};
     for (final draft in drafts) {
       final productId = await _productIdFor(draft.productName);
       if (draft.id != null && existing.any((e) => e.id == draft.id)) {
         kept.add(draft.id!);
-        await (db.update(db.purchaseItems)..where((i) => i.id.equals(draft.id!))).write(PurchaseItemsCompanion(
-          productId: Value(productId),
-          qty: Value(draft.qty),
-          unitPriceCny: Value(draft.unitPriceCny),
-          cargoTypeId: Value(draft.cargoTypeId),
-          updatedAt: Value(now),
-        ));
+        await (db.update(db.purchaseItems)..where((i) => i.id.equals(draft.id!))).write(
+          PurchaseItemsCompanion(
+            productId: Value(productId),
+            qty: Value(draft.qty),
+            unitPriceCny: Value(draft.unitPriceCny),
+            cargoTypeId: Value(draft.cargoTypeId),
+            updatedAt: Value(now),
+          ),
+        );
       } else {
-        await db.into(db.purchaseItems).insert(PurchaseItemsCompanion.insert(
-              storeId: storeId,
-              purchaseId: purchaseId,
-              productId: productId,
-              qty: draft.qty,
-              unitPriceCny: draft.unitPriceCny,
-              cargoTypeId: draft.cargoTypeId,
-            ));
+        await db
+            .into(db.purchaseItems)
+            .insert(
+              PurchaseItemsCompanion.insert(
+                storeId: storeId,
+                purchaseId: purchaseId,
+                productId: productId,
+                qty: draft.qty,
+                unitPriceCny: draft.unitPriceCny,
+                cargoTypeId: draft.cargoTypeId,
+              ),
+            );
       }
     }
     for (final removed in existing.where((e) => !kept.contains(e.id))) {
-      await (db.update(db.purchaseItems)..where((i) => i.id.equals(removed.id)))
-          .write(PurchaseItemsCompanion(deletedAt: Value(now), updatedAt: Value(now)));
+      await (db.update(db.purchaseItems)..where((i) => i.id.equals(removed.id))).write(
+        PurchaseItemsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+      );
     }
   }
 
@@ -333,37 +371,40 @@ class PurchaseRepository {
       for (final n in numbers)
         if (n.trim().isNotEmpty) n.trim().toUpperCase(),
     };
-    final existing = await (db.select(db.trackingNumbers)
-          ..where((t) => t.purchaseId.equals(purchaseId) & t.deletedAt.isNull()))
-        .get();
+    final existing = await (db.select(
+      db.trackingNumbers,
+    )..where((t) => t.purchaseId.equals(purchaseId) & t.deletedAt.isNull())).get();
     for (final t in existing) {
       if (!wanted.remove(t.number)) {
-        await (db.update(db.trackingNumbers)..where((x) => x.id.equals(t.id)))
-            .write(TrackingNumbersCompanion(deletedAt: Value(now), updatedAt: Value(now)));
+        await (db.update(db.trackingNumbers)..where((x) => x.id.equals(t.id))).write(
+          TrackingNumbersCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+        );
       }
     }
     for (final number in wanted) {
-      await db.into(db.trackingNumbers).insert(TrackingNumbersCompanion.insert(
-            storeId: storeId,
-            purchaseId: purchaseId,
-            number: number,
-          ));
+      await db
+          .into(db.trackingNumbers)
+          .insert(TrackingNumbersCompanion.insert(storeId: storeId, purchaseId: purchaseId, number: number));
     }
   }
 
   /// Finds a product by name (ignoring case and spacing) or creates it.
   Future<String> _productIdFor(String name) async {
     final clean = name.trim().replaceAll(RegExp(r'\s+'), ' ');
-    final match = await (db.select(db.products)
-          ..where((p) =>
-              p.storeId.equals(storeId) &
-              p.deletedAt.isNull() &
-              p.name.lower().equals(clean.toLowerCase()))
-          ..limit(1))
-        .getSingleOrNull();
+    final match =
+        await (db.select(db.products)
+              ..where(
+                (p) =>
+                    p.storeId.equals(storeId) &
+                    p.deletedAt.isNull() &
+                    p.name.lower().equals(clean.toLowerCase()),
+              )
+              ..limit(1))
+            .getSingleOrNull();
     if (match != null) return match.id;
-    final created =
-        await db.into(db.products).insertReturning(ProductsCompanion.insert(storeId: storeId, name: clean));
+    final created = await db
+        .into(db.products)
+        .insertReturning(ProductsCompanion.insert(storeId: storeId, name: clean));
     return created.id;
   }
 
@@ -373,13 +414,16 @@ class PurchaseRepository {
       );
 
   Future<void> deletePurchase(String id) => db.transaction(() async {
-        final now = DateTime.now();
-        final deleted = Value<DateTime?>(now);
-        await (db.update(db.purchaseItems)..where((i) => i.purchaseId.equals(id)))
-            .write(PurchaseItemsCompanion(deletedAt: deleted, updatedAt: Value(now)));
-        await (db.update(db.trackingNumbers)..where((t) => t.purchaseId.equals(id)))
-            .write(TrackingNumbersCompanion(deletedAt: deleted, updatedAt: Value(now)));
-        await (db.update(db.purchases)..where((p) => p.id.equals(id)))
-            .write(PurchasesCompanion(deletedAt: deleted, updatedAt: Value(now)));
-      });
+    final now = DateTime.now();
+    final deleted = Value<DateTime?>(now);
+    await (db.update(db.purchaseItems)..where((i) => i.purchaseId.equals(id))).write(
+      PurchaseItemsCompanion(deletedAt: deleted, updatedAt: Value(now)),
+    );
+    await (db.update(db.trackingNumbers)..where((t) => t.purchaseId.equals(id))).write(
+      TrackingNumbersCompanion(deletedAt: deleted, updatedAt: Value(now)),
+    );
+    await (db.update(
+      db.purchases,
+    )..where((p) => p.id.equals(id))).write(PurchasesCompanion(deletedAt: deleted, updatedAt: Value(now)));
+  });
 }

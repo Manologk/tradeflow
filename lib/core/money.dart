@@ -43,8 +43,7 @@ class Money implements Comparable<Money> {
   static String plain(int minor) => _grouped.format(minor / 100);
 
   /// Plain editable text, e.g. 118450 -> "1184.50", 0 -> "".
-  static String editable(int minor) =>
-      minor == 0 ? '' : (minor / 100).toStringAsFixed(2);
+  static String editable(int minor) => minor == 0 ? '' : (minor / 100).toStringAsFixed(2);
 
   Money operator +(Money other) {
     _checkCurrency(other);
@@ -71,14 +70,12 @@ class Money implements Comparable<Money> {
   }
 
   @override
-  bool operator ==(Object other) =>
-      other is Money && other.minor == minor && other.currency == currency;
+  bool operator ==(Object other) => other is Money && other.minor == minor && other.currency == currency;
 
   @override
   int get hashCode => Object.hash(minor, currency);
 
   /// e.g. "K1,184.50", "-K12.00", "¥320.00".
   @override
-  String toString() =>
-      '${isNegative ? '-' : ''}${currency.symbol}${plain(minor.abs())}';
+  String toString() => '${isNegative ? '-' : ''}${currency.symbol}${plain(minor.abs())}';
 }

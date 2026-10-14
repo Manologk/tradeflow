@@ -9,8 +9,8 @@ import '../../data/providers.dart';
 class AgentsScreen extends ConsumerWidget {
   const AgentsScreen({super.key});
 
-  void _edit(BuildContext context, [Agent? agent]) => Navigator.of(context)
-      .push(MaterialPageRoute<void>(builder: (_) => AgentEditScreen(agent: agent)));
+  void _edit(BuildContext context, [Agent? agent]) =>
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AgentEditScreen(agent: agent)));
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +28,8 @@ class AgentsScreen extends ConsumerWidget {
           ? const EmptyState(
               icon: Icons.local_shipping_outlined,
               title: 'No shipping agents yet',
-              message: 'Add your agent and their rate per kg for each cargo type. '
+              message:
+                  'Add your agent and their rate per kg for each cargo type. '
                   'The rates fill in automatically when you enter a shipping bill.',
             )
           : ListView(
@@ -38,10 +39,9 @@ class AgentsScreen extends ConsumerWidget {
                   ListTile(
                     enabled: !agent.archived,
                     title: Text(agent.name),
-                    subtitle: Text([
-                      if (agent.contact != null) agent.contact!,
-                      if (agent.archived) 'archived',
-                    ].join(' · ')),
+                    subtitle: Text(
+                      [if (agent.contact != null) agent.contact!, if (agent.archived) 'archived'].join(' · '),
+                    ),
                     onTap: agent.archived ? null : () => _edit(context, agent),
                     trailing: IconButton(
                       tooltip: agent.archived ? 'Restore' : 'Archive',
@@ -108,7 +108,9 @@ class _AgentEditScreenState extends ConsumerState<AgentEditScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
-    await ref.read(settingsRepositoryProvider).saveAgent(
+    await ref
+        .read(settingsRepositoryProvider)
+        .saveAgent(
           id: widget.agent?.id,
           name: _name.text,
           contact: _contact.text,
@@ -164,10 +166,7 @@ class _AgentEditScreenState extends ConsumerState<AgentEditScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  FilledButton(
-                    onPressed: _saving ? null : _save,
-                    child: const Text('Save agent'),
-                  ),
+                  FilledButton(onPressed: _saving ? null : _save, child: const Text('Save agent')),
                 ],
               ),
             ),

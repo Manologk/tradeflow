@@ -15,15 +15,17 @@ void main() {
 
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
-    await SetupRepository(db).completeSetup(storeName: 'Mano Imports', places: const [
-      OpeningPlace(name: 'Card', kind: MoneyPlaceKind.card, balanceZmw: 200000),
-      OpeningPlace(name: 'Cash', kind: MoneyPlaceKind.cash, balanceZmw: 0),
-    ]);
+    await SetupRepository(db).completeSetup(
+      storeName: 'Mano Imports',
+      places: const [
+        OpeningPlace(name: 'Card', kind: MoneyPlaceKind.card, balanceZmw: 200000),
+        OpeningPlace(name: 'Cash', kind: MoneyPlaceKind.cash, balanceZmw: 0),
+      ],
+    );
 
-    await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
-      child: const TradeFlowApp(),
-    ));
+    await tester.pumpWidget(
+      ProviderScope(overrides: [databaseProvider.overrideWithValue(db)], child: const TradeFlowApp()),
+    );
     await tester.pumpAndSettle();
     expect(find.text('K2,000.00'), findsWidgets);
 
