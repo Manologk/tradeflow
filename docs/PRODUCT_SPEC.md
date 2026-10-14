@@ -97,23 +97,22 @@ Every table has: `id (UUID)`, `store_id`, `created_at`, `updated_at`, `deleted_a
 | Entity | Key fields |
 |---|---|
 | **Store** | name, base currency (ZMW) |
-| **MoneyPlace** | name (Card / Mobile Money / Cash), kind, archived |
-| **Platform** | name (Taobao, Pinduoduo, 1688, Xianyu, WeChat, …) |
-| **Agent** | name, contact, default rates per cargo type (USD/kg) |
-| **CargoType** | name (General, Sensitive) |
+| **MoneyPlace** | name (Card / Mobile Money / Cash), kind, opening balance, archived |
+| **Lookup** | kind (platform / cargo type / channel / expense category), name, sort order, archived — one table for all short editable lists |
+| **Agent** | name, contact, archived |
+| **AgentRate** | agent_id, cargo_type_id, USD cents per kg |
 | **Product** | name, notes, photo (optional), has_variants |
 | **Variant** | product_id, label (e.g. "Black / XL") |
 | **Purchase** | platform_id, seller name, order ref, date, cny_total, zmw_paid, money_place_id, status, pre_order_sale_id (optional) |
 | **PurchaseItem** | purchase_id, product_id, variant_id, qty, cny_unit_price, cargo_type_id |
 | **TrackingNumber** | purchase_id, number |
 | **ShippingBill** | agent_id, date, usd_total, zmw_paid, money_place_id |
-| **ShippingLine** | bill_id, cargo_type_id, kg, usd_amount |
+| **ShippingLine** | bill_id, cargo_type_id, weight_grams, usd_amount |
 | **ShippingLinePurchase** | line_id, purchase_id |
 | **Collection** | date, transport_zmw, storage_zmw, money_place_id |
 | **CollectionPurchase** | collection_id, purchase_id |
 | **StockBatch** *(derived)* | purchase_item_id, qty, landed_unit_cost, received_at |
 | **Customer** | name, phone |
-| **Channel** | name (WhatsApp, Facebook, Shop, …) |
 | **Sale** | date, customer_id?, channel_id?, kind (stock / pre-order), status (pending / fulfilled / returned), total_zmw |
 | **SaleItem** | sale_id, product_id, variant_id, qty, unit_price_zmw |
 | **Payment** | sale_id, date, amount_zmw, money_place_id |
@@ -121,7 +120,7 @@ Every table has: `id (UUID)`, `store_id`, `created_at`, `updated_at`, `deleted_a
 | **Adjustment** | kind (write-off / lost / return / refund / compensation / currency-loss), reason, refs (purchase, sale, product, batch), qty, amount_zmw, money_place_id? |
 | **Transfer** | from_place, to_place, amount_zmw, fee_zmw |
 | **BalanceCheck** | date, money_place_id, actual_zmw, expected_zmw, gap_zmw, gap_label (unrecorded / personal / forgot expense) |
-| **Opening** | opening balances per place; opening stock batches (product, qty, unit cost) |
+| **OpeningStockItem** | product_id, variant_id?, qty, unit_cost_zmw (opening balances live on MoneyPlace) |
 
 **Money place balance** = opening + payments in − payments out ± transfers − fees + refunds/compensation − balance-check gaps.
 
