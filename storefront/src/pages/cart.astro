@@ -1,0 +1,22 @@
+---
+import BackHeader from '../components/BackHeader.astro';
+import ShopState from '../components/ShopState.astro';
+import Checkout from '../islands/Checkout';
+import Shop from '../layouts/Shop.astro';
+import { loadCatalog } from '../lib/load';
+import type { Catalog } from '../lib/models';
+
+const result = await loadCatalog();
+// The cart lives in the browser, so the island gets the catalog it needs to
+// price it. Descriptions are left out to keep the page small.
+const slim: Catalog | null = result.ok
+  ? { ...result.catalog, products: result.catalog.products.map((p) => ({ ...p, description: '', photos: p.photos.slice(0, 1) })) }
+  : null;
+---
+<Shop title="Checkout">
+  <div class="mx-auto max-w-xl">
+    <BackHeader title="Checkout" />
+    {!result.ok && <ShopState kind={result.kind} />}
+    {slim && <Checkout client:load catalog={slim} />}
+  </div>
+</Shop>

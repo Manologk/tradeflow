@@ -1,6 +1,6 @@
 # TradeFlow
 
-Offline Android app for tracking China import purchases, shipping, stock, sales and profit — built for traders who buy on Taobao, Pinduoduo, 1688 and friends and resell locally.
+Offline Android admin app for tracking China import purchases, shipping, stock, sales and profit — built for traders who buy on Taobao, Pinduoduo, 1688 and friends and resell locally.
 
 See [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) for the admin app spec and [docs/STOREFRONT_SPEC.md](docs/STOREFRONT_SPEC.md) for the online shop.
 
@@ -21,3 +21,7 @@ flutter build apk --release
 ```
 
 Release builds are signed with the key provided through the `TRADEFLOW_KEYSTORE*` / `TRADEFLOW_KEY_*` secrets; without them the APK is debug-signed.
+
+## Storefront
+
+The online shop lives in [`storefront/`](storefront/README.md): an Astro website for Cloudflare Pages that reads its catalog from Supabase.

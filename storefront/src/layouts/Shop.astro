@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import CartBadge from '../islands/CartBadge';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string | null;
+  /** Show the floating bottom bar, highlighting this tab. */
+  tab?: 'shop' | 'favourites' | 'orders' | null;
+}
+const { title, description = 'Browse anime merch and order on WhatsApp.', image = null, tab = null } = Astro.props;
+const showBar = tab !== null;
+const tabClass = (on: boolean) =>
+  `grid size-12 place-items-center rounded-full text-white ${on ? 'bg-white/15' : ''}`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#292526" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {image && <meta property="og:image" content={image} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" href="/fonts/encode-sans-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/encode-sans-600.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <!-- Phone-first design that widens into more columns on tablets and desktops. -->
+    <main class={`relative mx-auto min-h-dvh max-w-6xl bg-page ${showBar ? 'pb-28' : ''}`}>
+      <slot />
+    </main>
+    {
+      showBar && (
+        <nav
+          aria-label="Shop"
+          class="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md px-5 pb-[max(16px,env(safe-area-inset-bottom))]"
+        >
+          <div class="flex h-16 items-center justify-around rounded-full bg-ink px-3 shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
+            <a href="/" class={tabClass(tab === 'shop')} aria-label="Shop" aria-current={tab === 'shop' ? 'page' : undefined}>
+              <Icon name="home" size={24} filled={tab === 'shop'} />
+            </a>
+            <CartBadge client:load />
+            <a href="/favourites" class={tabClass(tab === 'favourites')} aria-label="Favourites" aria-current={tab === 'favourites' ? 'page' : undefined}>
+              <Icon name="heart" size={24} filled={tab === 'favourites'} />
+            </a>
+            <a href="/orders" class={tabClass(tab === 'orders')} aria-label="My orders" aria-current={tab === 'orders' ? 'page' : undefined}>
+              <Icon name="receipt" size={24} />
+            </a>
+          </div>
+        </nav>
+      )
+    }
+  </body>
+</html>

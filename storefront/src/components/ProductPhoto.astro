@@ -1,0 +1,27 @@
+---
+import type { ShopProduct } from '../lib/models';
+
+interface Props {
+  product: ShopProduct;
+  index?: number;
+  class?: string;
+  eager?: boolean;
+}
+const { product, index = 0, class: className = '', eager = false } = Astro.props;
+const url = product.photos[index];
+---
+{
+  url ? (
+    <img
+      src={url}
+      alt={product.name}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      class={`size-full object-cover ${className}`}
+    />
+  ) : (
+    <span class={`grid size-full place-items-center bg-surface text-4xl font-semibold text-grey-light ${className}`} aria-hidden="true">
+      {product.name.charAt(0).toUpperCase()}
+    </span>
+  )
+}

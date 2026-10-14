@@ -17,11 +17,11 @@ Design reference: Figma "ChicCraze – eCommerce Clothing Store App" (NAM Design
 | # | Topic | Decision |
 |---|---|---|
 | S1 | Role of existing app | Becomes the **admin**: stock, purchases, costs, sales, money, reports. Stays offline-first. |
-| S2 | Platform | **Website first** (Flutter web, mobile-first layout). Same code can become an Android app later. |
+| S2 | Platform | **Website first**: a plain, fast website (Astro, server-rendered, small Preact islands for cart/favourites). Mobile-first and responsive: 2 columns on phones, 3 on tablets, 4 on desktop; product page goes side-by-side on wide screens. Loads in well under half a megabyte. |
 | S3 | Checkout | **WhatsApp order.** Cart → "Order on WhatsApp" opens a pre-filled message to the shop; the order is also saved online and pulled into the admin. Payment by mobile money or on delivery, recorded in the admin. |
 | S4 | What's shown | **In stock + pre-order.** Pre-order items say "Pre-order · arrives in ~N weeks" (lead time set per product). |
 | S5 | Accounts | **Guest checkout.** Name, phone, delivery area at checkout. "My orders" looks orders up by phone number + order code. |
-| S6 | Hosting / cloud | **Free tiers:** Supabase (database, file storage for photos) + static hosting (Firebase Hosting / Netlify / GitHub Pages). |
+| S6 | Hosting / cloud | **Free tiers:** Supabase (database, photo storage) + **Cloudflare Pages** (site and its small server functions; free plan allows commercial use, unlike Vercel's). Supabase's free project pauses after 7 days without traffic. |
 | S7 | Ratings & reviews | **Dropped** from the template (fake numbers). Can return later as real reviews. |
 | S8 | Browsing | Filter by **category** and by **anime series** (Naruto, One Piece, Demon Slayer, …), plus search. |
 | S9 | Variants | Size / colour chips appear **only** for products that have variants (clothing). |
@@ -67,6 +67,9 @@ Added in the same style:
   compare-at price, variants, availability (in stock / pre-order / sold out) and lead time.
   **Costs, suppliers, profit and money never leave the phone.**
 - Stock is published as an availability label (and optionally a "few left" flag), not exact counts.
+- The website reads the catalog on the server (cached ~60 s) and sends orders to its own `/api/orders`,
+  which re-prices every line from the catalog before saving through a Supabase function, so a tampered cart
+  can't change prices.
 - Storefront orders are pulled into the admin as **pending sales/pre-orders** linked to a customer (by phone);
   confirming one in the admin works like any other sale (payments, deposit, delivered, profit).
 
@@ -93,11 +96,11 @@ Added in the same style:
 
 | # | Milestone | Done when |
 |---|---|---|
-| S-M1 | Storefront UI behind a catalog/order interface | All screens built to the design; cart & WhatsApp message work (tested with test fixtures) |
+| S-M1 ✅ | Storefront UI behind a catalog/order interface | All screens built to the design; cart & WhatsApp message work (tested with test fixtures) |
 | S-M2 | Supabase schema + RLS + storage | Catalog readable anonymously; orders insertable; security tests pass |
 | S-M3 | Admin: shop fields, lists, publish to cloud | Products with photos appear on the site |
 | S-M4 | Orders into admin | Website order shows in admin inbox; confirm creates sale; status visible in "My orders" |
-| S-M5 | Deploy | Site live on free hosting with a shareable link |
+| S-M5 | Deploy | Site live on Cloudflare Pages with a shareable link |
 
 ## 9. Needed from the owner
 

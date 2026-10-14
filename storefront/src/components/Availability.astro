@@ -1,0 +1,20 @@
+---
+import type { ShopProduct } from '../lib/models';
+import Icon from './Icon.astro';
+
+interface Props {
+  product: ShopProduct;
+  compact?: boolean;
+}
+const { product, compact = false } = Astro.props;
+const lead = product.leadTimeWeeks ? ` · arrives in ~${product.leadTimeWeeks} weeks` : '';
+const [icon, text, tone] = {
+  inStock: ['checkCircle', 'In stock', 'text-grey'],
+  fewLeft: ['flame', 'Only a few left', 'text-sale'],
+  preOrder: ['clock', compact ? 'Pre-order' : `Pre-order${lead}`, 'text-ink'],
+  soldOut: ['block', 'Sold out', 'text-grey'],
+}[product.availability] as ['checkCircle' | 'flame' | 'clock' | 'block', string, string];
+---
+<span class={`inline-flex items-center gap-1 font-medium ${tone} ${compact ? 'text-xs' : 'text-sm'}`}>
+  <Icon name={icon} size={compact ? 14 : 16} />{text}
+</span>

@@ -1,0 +1,11 @@
+---
+import OrderSent from '../../islands/OrderSent';
+import Shop from '../../layouts/Shop.astro';
+
+const code = (Astro.params.code ?? '').toUpperCase().slice(0, 12);
+---
+<Shop title={`Order ${code}`}>
+  <div class="mx-auto max-w-xl">
+    <OrderSent client:load code={code} />
+  </div>
+</Shop>

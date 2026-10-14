@@ -1,0 +1,89 @@
+---
+import Availability from '../../components/Availability.astro';
+import Icon from '../../components/Icon.astro';
+import Price from '../../components/Price.astro';
+import ProductPhoto from '../../components/ProductPhoto.astro';
+import ShopState from '../../components/ShopState.astro';
+import FavouriteButton from '../../islands/FavouriteButton';
+import ProductOptions from '../../islands/ProductOptions';
+import Shop from '../../layouts/Shop.astro';
+import { loadCatalog } from '../../lib/load';
+import { kwacha } from '../../lib/money';
+import { canOrder } from '../../lib/models';
+
+const result = await loadCatalog();
+const product = result.ok ? result.catalog.products.find((p) => p.id === Astro.params.id) : undefined;
+if (result.ok && !product) Astro.response.status = 404;
+const series = result.ok && product ? result.catalog.series.find((s) => s.id === product.seriesId) : undefined;
+const category = result.ok && product ? result.catalog.categories.find((c) => c.id === product.categoryId) : undefined;
+const shopName = result.ok ? result.catalog.settings.name : 'Shop';
+const photoCount = Math.max(1, product?.photos.length ?? 0);
+---
+<Shop
+  title={product ? `${product.name} · ${shopName}` : shopName}
+  description={product ? `${kwacha(product.priceZmw)}${series ? ` · ${series.name}` : ''}. Order on WhatsApp.` : undefined}
+  image={product?.photos[0] ?? null}
+>
+  {!result.ok && <ShopState kind={result.kind} />}
+  {result.ok && !product && <ShopState kind="notFound" />}
+  {
+    product && (
+      <article class="px-5 pt-3 pb-32 md:grid md:grid-cols-2 md:items-start md:gap-10 md:px-8 md:pt-8 md:pb-16">
+        <div class="relative md:sticky md:top-8">
+          <div class="flex aspect-[0.85] snap-x snap-mandatory overflow-x-auto rounded-[28px] [scrollbar-width:none]">
+            {Array.from({ length: photoCount }, (_, i) => (
+              <div class="h-full w-full shrink-0 snap-center">
+                <ProductPhoto product={product} index={i} eager={i === 0} />
+              </div>
+            ))}
+          </div>
+          <a href="/" class="circle-btn absolute top-3.5 left-3.5" aria-label="Back to shop">
+            <Icon name="back" size={20} />
+          </a>
+          <span class="absolute top-3.5 right-3.5">
+            <FavouriteButton productId={product.id} size={44} client:load />
+          </span>
+          {photoCount > 1 && (
+            <p class="absolute right-0 bottom-3 left-0 text-center text-xs font-medium text-white drop-shadow">
+              Swipe for {photoCount} photos
+            </p>
+          )}
+        </div>
+
+        <div>
+        <h1 class="mt-6 text-2xl leading-tight font-semibold text-balance md:mt-0 md:text-3xl">{product.name}</h1>
+        <p class="mt-1.5 muted">{[series?.name, category?.name].filter(Boolean).join(' · ')}</p>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <Price product={product} large />
+          <Availability product={product} />
+        </div>
+
+        {product.description.trim() && (
+          <details class="group mt-4">
+            <summary class="cursor-pointer list-none text-grey [&::-webkit-details-marker]:hidden">
+              <span class="line-clamp-3 group-open:line-clamp-none">{product.description}</span>
+              {product.description.length > 140 && (
+                <span class="font-semibold text-ink-deep group-open:hidden">Read more…</span>
+              )}
+            </summary>
+          </details>
+        )}
+
+        <div class="mt-6">
+          <ProductOptions
+            client:load
+            productId={product.id}
+            name={product.name}
+            priceZmw={product.priceZmw}
+            compareAtZmw={product.compareAtZmw}
+            sizes={product.sizes}
+            colors={product.colors}
+            preOrder={product.availability === 'preOrder'}
+            canOrder={canOrder(product)}
+          />
+        </div>
+        </div>
+      </article>
+    )
+  }
+</Shop>

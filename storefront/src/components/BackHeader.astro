@@ -1,0 +1,14 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title?: string;
+  back?: string;
+}
+const { title, back = '/' } = Astro.props;
+---
+<header class="flex items-center gap-3 px-5 pt-3 pb-2">
+  <a href={back} class="circle-btn" aria-label="Back"><Icon name="back" size={20} /></a>
+  {title && <h1 class="flex-1 text-center text-lg font-semibold">{title}</h1>}
+  {title && <span class="size-11" aria-hidden="true"></span>}
+</header>

@@ -1,0 +1,28 @@
+---
+import FavouriteButton from '../islands/FavouriteButton';
+import { canOrder, type ShopProduct } from '../lib/models';
+import Availability from './Availability.astro';
+import Price from './Price.astro';
+import ProductPhoto from './ProductPhoto.astro';
+
+interface Props {
+  product: ShopProduct;
+  seriesName?: string | null;
+}
+const { product, seriesName } = Astro.props;
+---
+<li class="relative">
+  <a href={`/p/${product.id}`} class="block">
+    <div class={`relative aspect-[0.82] overflow-hidden rounded-[20px] bg-surface ${canOrder(product) ? '' : 'opacity-50'}`}>
+      <ProductPhoto product={product} />
+    </div>
+    <p class="mt-2.5 line-clamp-2 leading-tight font-semibold">{product.name}</p>
+    {seriesName && <p class="text-xs text-grey-light">{seriesName}</p>}
+    <p class="mt-1.5"><Price product={product} /></p>
+    <Availability product={product} compact />
+  </a>
+  <!-- Outside the link so tapping the heart never opens the product. -->
+  <span class="absolute top-2.5 right-2.5">
+    <FavouriteButton productId={product.id} client:visible />
+  </span>
+</li>

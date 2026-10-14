@@ -1,0 +1,22 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  kind: 'opening' | 'error' | 'notFound';
+}
+const { kind } = Astro.props;
+const content = {
+  opening: { icon: 'store', title: 'Opening soon', body: 'The shop is being set up. Check back shortly!' },
+  error: { icon: 'wifiOff', title: "Couldn't load the shop", body: 'Please try again in a moment.' },
+  notFound: { icon: 'search', title: 'This item is no longer available', body: 'It may have sold out or been removed.' },
+}[kind] as { icon: 'store' | 'wifiOff' | 'search'; title: string; body: string };
+---
+<div class="flex flex-col items-center px-8 py-28 text-center">
+  <div class="grid size-18 place-items-center rounded-full bg-surface text-grey">
+    <Icon name={content.icon} size={32} />
+  </div>
+  <h1 class="mt-4 text-lg font-semibold">{content.title}</h1>
+  <p class="mt-2 muted">{content.body}</p>
+  {kind === 'error' && <a href="" class="btn-outline mt-6 max-w-48">Try again</a>}
+  {kind === 'notFound' && <a href="/" class="btn-primary mt-6 max-w-56">Back to shop</a>}
+</div>

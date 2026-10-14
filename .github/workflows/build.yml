@@ -75,22 +75,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          flutter-version: 3.47.7
-          channel: stable
-          cache: true
+          node-version: 22
+          cache: npm
+          cache-dependency-path: storefront/package-lock.json
 
-      - run: flutter pub get
+      # npm 10 crashes resolving this lockfile; npm 11 doesn't.
+      - run: npx -y npm@11.20.0 ci
 
-      - run: flutter analyze
+      - run: npx astro check
 
-      - run: flutter test
+      - run: npm test
 
-      - name: Build website
-        run: flutter build web --release --no-web-resources-cdn
+      - run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests (built-in test catalog)
+        run: npm run test:e2e
 
       - uses: actions/upload-artifact@v4
+        if: failure()
         with:
-          name: storefront-web
-          path: storefront/build/web
+          name: storefront-e2e-report
+          path: storefront/test-results

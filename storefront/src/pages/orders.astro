@@ -1,0 +1,10 @@
+---
+import MyOrders from '../islands/MyOrders';
+import Shop from '../layouts/Shop.astro';
+---
+<Shop title="My orders" tab="orders">
+  <div class="mx-auto max-w-xl px-5 pt-5 md:pt-8">
+    <h1 class="mb-4 text-2xl font-bold">My orders</h1>
+    <MyOrders client:load />
+  </div>
+</Shop>

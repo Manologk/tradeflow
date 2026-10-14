@@ -1,0 +1,17 @@
+---
+import ShopState from '../components/ShopState.astro';
+import Favourites from '../islands/Favourites';
+import Shop from '../layouts/Shop.astro';
+import { loadCatalog } from '../lib/load';
+
+const result = await loadCatalog();
+const products = result.ok
+  ? result.catalog.products.map((p) => ({ id: p.id, name: p.name, priceZmw: p.priceZmw, photos: p.photos.slice(0, 1), availability: p.availability }))
+  : [];
+---
+<Shop title="Favourites" tab="favourites">
+  <div class="px-5 pt-5 md:px-8 md:pt-8">
+    <h1 class="mb-4 text-2xl font-bold">Favourites</h1>
+    {!result.ok ? <ShopState kind={result.kind} /> : <Favourites client:load products={products} />}
+  </div>
+</Shop>

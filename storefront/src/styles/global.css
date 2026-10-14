@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* ChicCraze style guide (docs/STOREFRONT_SPEC.md §3). */
+@theme {
+  --color-ink: #292526;
+  --color-ink-deep: #121111;
+  --color-grey: #787676;
+  --color-grey-light: #a3a1a2;
+  --color-surface: #f2f2f2;
+  --color-line: #e6e5e5;
+  --color-sale: #d64545;
+  --color-page: #ffffff;
+  --color-backdrop: #f6f6f7;
+  --font-sans: "Encode Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@font-face { font-family: "Encode Sans"; font-weight: 400; font-display: swap; src: url("/fonts/encode-sans-400.woff2") format("woff2"); }
+@font-face { font-family: "Encode Sans"; font-weight: 500; font-display: swap; src: url("/fonts/encode-sans-500.woff2") format("woff2"); }
+@font-face { font-family: "Encode Sans"; font-weight: 600; font-display: swap; src: url("/fonts/encode-sans-600.woff2") format("woff2"); }
+@font-face { font-family: "Encode Sans"; font-weight: 700; font-display: swap; src: url("/fonts/encode-sans-700.woff2") format("woff2"); }
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-page text-ink-deep font-sans antialiased; }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer components {
+  .pill { @apply inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-[15px] font-medium whitespace-nowrap; }
+  .pill-on { @apply border-ink bg-ink text-white; }
+  .btn-primary { @apply flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-ink text-base font-semibold text-white disabled:opacity-40; }
+  .btn-outline { @apply flex h-13 w-full items-center justify-center gap-2.5 rounded-full border border-line bg-white text-base font-semibold; }
+  .circle-btn { @apply grid size-11 place-items-center rounded-full border border-line bg-white; }
+  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3.5 text-base placeholder:text-grey-light focus:border-ink focus:outline-none; }
+  .muted { @apply text-grey; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
