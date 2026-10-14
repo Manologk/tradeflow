@@ -1,13 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/costing.dart';
+import '../domain/fifo.dart';
 
 import 'database.dart';
 import 'money_repository.dart';
 import 'purchase_repository.dart';
 import 'settings_repository.dart';
+import 'sales_repository.dart';
 import 'setup_repository.dart';
 import 'shipping_repository.dart';
+import 'stock_repository.dart';
 
 /// Overridden in main() (and in tests with an in-memory database).
 final databaseProvider = Provider<AppDatabase>(
@@ -81,4 +84,36 @@ final collectionsProvider = StreamProvider<List<CollectionSummary>>(
 
 final landedCostsProvider = StreamProvider<Map<String, ItemLandedCost>>(
   (ref) => ref.watch(shippingRepositoryProvider).watchLandedCosts(),
+);
+
+final salesRepositoryProvider = Provider<SalesRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return SalesRepository(ref.watch(databaseProvider), store.id);
+});
+
+final stockRepositoryProvider = Provider<StockRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return StockRepository(ref.watch(databaseProvider), store.id, ref.watch(shippingRepositoryProvider));
+});
+
+final salesProvider = StreamProvider<List<SaleSummary>>(
+  (ref) => ref.watch(salesRepositoryProvider).watchSales(),
+);
+
+final saleDetailProvider = StreamProvider.family<SaleDetail?, String>(
+  (ref, id) => ref.watch(salesRepositoryProvider).watchSale(id),
+);
+
+final debtsProvider = StreamProvider<List<CustomerDebt>>(
+  (ref) => ref.watch(salesRepositoryProvider).watchDebts(),
+);
+
+final customersProvider = StreamProvider<List<Customer>>(
+  (ref) => ref.watch(salesRepositoryProvider).watchCustomers(),
+);
+
+final stockLedgerProvider = StreamProvider<StockLedger>(
+  (ref) => ref.watch(stockRepositoryProvider).watchLedger(),
 );

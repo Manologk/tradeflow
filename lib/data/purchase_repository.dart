@@ -36,6 +36,7 @@ class PurchaseDraft {
     required this.moneyPlaceId,
     this.trackingNumbers = const [],
     this.notes,
+    this.preOrderSaleId,
   });
 
   final String? id;
@@ -51,6 +52,9 @@ class PurchaseDraft {
   final String moneyPlaceId;
   final List<String> trackingNumbers;
   final String? notes;
+
+  /// The customer pre-order this purchase was made for, if any.
+  final String? preOrderSaleId;
 
   int get totalCny => items.fold(0, (sum, i) => sum + i.valueCny) + sellerDeliveryCny;
 }
@@ -294,6 +298,7 @@ class PurchaseRepository {
                 moneyPlaceId: draft.moneyPlaceId,
                 status: draft.trackingNumbers.isEmpty ? PurchaseStatus.ordered : PurchaseStatus.shipped,
                 notes: Value(clean(draft.notes)),
+                preOrderSaleId: Value(draft.preOrderSaleId),
               ),
             );
         purchaseId = row.id;
@@ -309,6 +314,7 @@ class PurchaseRepository {
             paidZmw: Value(draft.paidZmw),
             moneyPlaceId: Value(draft.moneyPlaceId),
             notes: Value(clean(draft.notes)),
+            preOrderSaleId: Value(draft.preOrderSaleId),
             updatedAt: Value(now),
           ),
         );

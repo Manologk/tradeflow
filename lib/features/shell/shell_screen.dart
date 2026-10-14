@@ -5,6 +5,7 @@ import '../../core/widgets.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
 import '../purchases/buy_screen.dart';
+import '../sales/sell_screen.dart';
 import '../settings/settings_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     final body = switch (_index) {
       0 => const HomeScreen(),
       1 => const BuyScreen(),
-      2 => const _ComingSoon(icon: Icons.sell_outlined, title: 'Sales'),
+      2 => const SellScreen(),
       3 => const _ComingSoon(icon: Icons.account_balance_wallet_outlined, title: 'Money'),
       _ => const _ComingSoon(icon: Icons.insights_outlined, title: 'Reports'),
     };

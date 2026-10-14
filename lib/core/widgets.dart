@@ -109,3 +109,65 @@ class EmptyState extends StatelessWidget {
     );
   }
 }
+
+/// Text field that suggests matching [options] as you type, while still
+/// accepting new text (e.g. a product or customer name not seen before).
+class SuggestField extends StatelessWidget {
+  const SuggestField({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+    required this.options,
+    required this.label,
+    this.requiredMessage,
+    this.onSelected,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final List<String> options;
+  final String label;
+
+  /// Validation message when empty; null makes the field optional.
+  final String? requiredMessage;
+  final ValueChanged<String>? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawAutocomplete<String>(
+      textEditingController: controller,
+      focusNode: focusNode,
+      optionsBuilder: (value) {
+        final q = value.text.trim().toLowerCase();
+        if (q.isEmpty) return const [];
+        return options.where((n) => n.toLowerCase().contains(q) && n.toLowerCase() != q);
+      },
+      onSelected: onSelected,
+      fieldViewBuilder: (context, controller, focusNode, onSubmit) => TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(labelText: label),
+        validator: requiredMessage == null
+            ? null
+            : (v) => (v == null || v.trim().isEmpty) ? requiredMessage : null,
+      ),
+      optionsViewBuilder: (context, onSelected, options) => Align(
+        alignment: Alignment.topLeft,
+        child: Material(
+          elevation: 4,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 220, maxWidth: 320),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              children: [
+                for (final option in options) ListTile(title: Text(option), onTap: () => onSelected(option)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

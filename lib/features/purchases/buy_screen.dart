@@ -176,6 +176,7 @@ class _ProductList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final all = ref.watch(productsProvider).value;
+    final ledger = ref.watch(stockLedgerProvider).value;
     if (all == null) return const Center(child: CircularProgressIndicator());
     if (all.isEmpty) {
       return const EmptyState(
@@ -195,7 +196,9 @@ class _ProductList extends ConsumerWidget {
             title: Text(summary.product.name),
             subtitle: Text(
               [
-                '${summary.unitsReceived} received',
+                if (ledger != null) '${ledger.stockOf(summary.product.id).qty} in stock',
+                if (ledger?.stockOf(summary.product.id).unitCostZmw case final unit?)
+                  'cost ${Money(unit)} each',
                 if (summary.unitsOnTheWay > 0) '${summary.unitsOnTheWay} on the way',
               ].join(' · '),
             ),

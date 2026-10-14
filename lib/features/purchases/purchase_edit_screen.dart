@@ -7,6 +7,7 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/purchase_repository.dart';
+import '../../data/sales_repository.dart';
 import '../../domain/costing.dart';
 import 'purchase_labels.dart';
 
@@ -57,6 +58,8 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
   var _orderedAt = DateTime.now();
   String? _platformId;
   String? _moneyPlaceId;
+  String? _preOrderSaleId;
+  List<SaleSummary> _preOrders = const [];
   var _saving = false;
 
   bool get _isEdit => widget.existing != null;
@@ -75,6 +78,7 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
       _orderedAt = p.orderedAt;
       _platformId = p.platformId;
       _moneyPlaceId = p.moneyPlaceId;
+      _preOrderSaleId = p.preOrderSaleId;
       _tracking.addAll(e.trackingNumbers);
       for (final i in e.items) {
         _items.add(
@@ -98,6 +102,15 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
     }
     _delivery.addListener(_refresh);
     _paid.addListener(_refresh);
+    ref.read(salesRepositoryProvider).loadSales().then((sales) {
+      if (!mounted) return;
+      setState(() {
+        _preOrders = [
+          for (final s in sales)
+            if (s.isPendingPreOrder || s.sale.id == _preOrderSaleId) s,
+        ];
+      });
+    });
   }
 
   void _refresh() => setState(() {});
@@ -164,6 +177,7 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
       moneyPlaceId: moneyPlaceId,
       trackingNumbers: _tracking,
       notes: _notes.text,
+      preOrderSaleId: _preOrderSaleId,
     );
     try {
       await ref.read(purchaseRepositoryProvider).savePurchase(draft);
@@ -319,6 +333,26 @@ class _PurchaseEditScreenState extends ConsumerState<PurchaseEditScreen> {
                     ),
                     onSubmitted: (_) => _addTracking(),
                   ),
+                  if (_preOrders.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String?>(
+                      isExpanded: true,
+                      initialValue: _preOrderSaleId,
+                      decoration: const InputDecoration(labelText: 'Bought for a pre-order?'),
+                      items: [
+                        const DropdownMenuItem(value: null, child: Text('No, for stock')),
+                        for (final o in _preOrders)
+                          DropdownMenuItem(
+                            value: o.sale.id,
+                            child: Text(
+                              '${o.customer?.name ?? 'Customer'}: ${o.itemNames.join(', ')}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _preOrderSaleId = v),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _orderRef,
@@ -377,38 +411,12 @@ class _ItemCard extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  RawAutocomplete<String>(
-                    textEditingController: row.name,
+                  SuggestField(
+                    controller: row.name,
                     focusNode: row.focus,
-                    optionsBuilder: (value) {
-                      final q = value.text.trim().toLowerCase();
-                      if (q.isEmpty) return const [];
-                      return productNames.where((n) => n.toLowerCase().contains(q) && n.toLowerCase() != q);
-                    },
-                    fieldViewBuilder: (context, controller, focusNode, onSubmit) => TextFormField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(labelText: 'Item'),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter the item' : null,
-                    ),
-                    optionsViewBuilder: (context, onSelected, options) => Align(
-                      alignment: Alignment.topLeft,
-                      child: Material(
-                        elevation: 4,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 220, maxWidth: 320),
-                          child: ListView(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            children: [
-                              for (final option in options)
-                                ListTile(title: Text(option), onTap: () => onSelected(option)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    options: productNames,
+                    label: 'Item',
+                    requiredMessage: 'Enter the item',
                   ),
                   const SizedBox(height: 12),
                   Row(

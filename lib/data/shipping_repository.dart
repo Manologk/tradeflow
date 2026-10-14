@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../domain/costing.dart';
+import '../core/streams.dart';
 import 'database.dart';
 
 class ShippingLineDraft {
@@ -505,13 +506,5 @@ class ShippingRepository {
           CostCollection(id: c.collection.id, costZmw: c.costZmw, purchaseIds: c.purchaseIds),
       ],
     );
-  }
-}
-
-extension<T> on Stream<T> {
-  /// Emits [value] first, then everything from this stream.
-  Stream<T> startWith(T value) async* {
-    yield value;
-    yield* this;
   }
 }

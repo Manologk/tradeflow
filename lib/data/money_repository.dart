@@ -16,13 +16,15 @@ class MoneyRepository {
   final AppDatabase db;
   final String storeId;
 
-  /// Opening balance minus purchase, shipping and collection payments.
-  /// Sales, expenses and transfers join this sum as their milestones land.
+  /// Opening balance plus customer payments, minus purchase, shipping and
+  /// collection payments. Expenses and transfers join as their milestones land.
   Stream<List<PlaceBalance>> watchBalances() {
     final query = db.customSelect(
       '''
       SELECT mp.*,
         mp.opening_balance_zmw
+          + (SELECT COALESCE(SUM(pay.amount_zmw), 0) FROM payments pay
+               WHERE pay.money_place_id = mp.id AND pay.deleted_at IS NULL)
           - (SELECT COALESCE(SUM(p.paid_zmw), 0) FROM purchases p
                WHERE p.money_place_id = mp.id AND p.deleted_at IS NULL)
           - (SELECT COALESCE(SUM(b.paid_zmw), 0) FROM shipping_bills b
@@ -34,7 +36,7 @@ class MoneyRepository {
       ORDER BY mp.sort_order
       ''',
       variables: [Variable.withString(storeId)],
-      readsFrom: {db.moneyPlaces, db.purchases, db.shippingBills, db.collections},
+      readsFrom: {db.moneyPlaces, db.purchases, db.shippingBills, db.collections, db.payments},
     );
     return query.watch().map(
       (rows) => [
