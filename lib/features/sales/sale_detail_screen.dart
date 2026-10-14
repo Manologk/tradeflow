@@ -8,6 +8,7 @@ import '../../data/sales_repository.dart';
 import '../../domain/fifo.dart';
 import '../purchases/purchase_detail_screen.dart';
 import '../purchases/purchase_labels.dart';
+import '../money/money_dialogs.dart';
 import 'payment_dialog.dart';
 import 'sale_edit_screen.dart';
 
@@ -46,6 +47,12 @@ class SaleDetailScreen extends ConsumerWidget {
           moneyPlaceId: input.moneyPlaceId,
           paidAt: DateTime.now(),
         );
+  }
+
+  Future<void> _addDelivery(BuildContext context, WidgetRef ref) async {
+    final categoryId = await ref.read(moneyRepositoryProvider).deliveryCategoryId();
+    if (!context.mounted) return;
+    await showExpenseDialog(context, saleId: saleId, categoryId: categoryId, title: 'Delivery cost');
   }
 
   Future<void> _deletePayment(BuildContext context, WidgetRef ref, Payment payment) async {
@@ -90,6 +97,8 @@ class SaleDetailScreen extends ConsumerWidget {
     final costs = [for (final i in d.items) ledger?.demandCosts[i.item.id]];
     final totalCost = costs.fold<int>(0, (sum, c) => sum + (c?.costZmw ?? 0));
     final incomplete = costs.any((c) => c != null && !c.isComplete);
+    final expenses = ref.watch(saleExpensesProvider(saleId)).value ?? const <Expense>[];
+    final extraCosts = expenses.fold<int>(0, (sum, e) => sum + e.amountZmw);
     final outline = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline);
 
     return Scaffold(
@@ -152,7 +161,8 @@ class SaleDetailScreen extends ConsumerWidget {
             const Divider(),
             _row(theme, 'Sold for', Money(s.totalZmw)),
             _row(theme, 'Cost of goods', Money(totalCost)),
-            _row(theme, 'Profit', Money(s.totalZmw - totalCost), bold: true),
+            if (extraCosts > 0) _row(theme, 'Delivery & other costs', Money(extraCosts)),
+            _row(theme, 'Profit', Money(s.totalZmw - totalCost - extraCosts), bold: true),
             if (incomplete)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -163,7 +173,28 @@ class SaleDetailScreen extends ConsumerWidget {
                 ),
               ),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          for (final e in expenses)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.local_shipping_outlined),
+              title: Text('Delivery / cost ${Money(e.amountZmw)}'),
+              subtitle: e.note == null ? null : Text(e.note!),
+              trailing: IconButton(
+                tooltip: 'Remove cost',
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => ref.read(moneyRepositoryProvider).deleteExpense(e.id),
+              ),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _addDelivery(context, ref),
+              icon: const Icon(Icons.add),
+              label: const Text('Add delivery cost'),
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(child: Text('Payments', style: theme.textTheme.titleMedium)),

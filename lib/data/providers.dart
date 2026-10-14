@@ -117,3 +117,15 @@ final customersProvider = StreamProvider<List<Customer>>(
 final stockLedgerProvider = StreamProvider<StockLedger>(
   (ref) => ref.watch(stockRepositoryProvider).watchLedger(),
 );
+
+final movementsProvider = StreamProvider<List<Movement>>(
+  (ref) => ref.watch(moneyRepositoryProvider).watchMovements(),
+);
+
+final lastBalanceCheckProvider = StreamProvider<DateTime?>(
+  (ref) => ref.watch(moneyRepositoryProvider).watchLastBalanceCheck(),
+);
+
+final saleExpensesProvider = StreamProvider.family<List<Expense>, String>(
+  (ref, saleId) => ref.watch(moneyRepositoryProvider).watchSaleExpenses(saleId),
+);

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
+import '../money/money_screen.dart';
 import '../purchases/buy_screen.dart';
 import '../sales/sell_screen.dart';
 import '../settings/settings_screen.dart';
@@ -45,7 +46,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
       0 => const HomeScreen(),
       1 => const BuyScreen(),
       2 => const SellScreen(),
-      3 => const _ComingSoon(icon: Icons.account_balance_wallet_outlined, title: 'Money'),
+      3 => const MoneyScreen(),
       _ => const _ComingSoon(icon: Icons.insights_outlined, title: 'Reports'),
     };
 
