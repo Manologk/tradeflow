@@ -181,7 +181,8 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
         </div>
         <div class="flex justify-between">
           <dt>Delivery fee</dt>
-          <dd class="font-semibold">{kwacha(totals.deliveryZmw)}</dd>
+          {/* No delivery areas set up means delivery is part of the price. */}
+          <dd class="font-semibold">{settings.deliveryAreas.length ? kwacha(totals.deliveryZmw) : 'Included'}</dd>
         </div>
         <div class="mt-2 flex justify-between border-t border-line pt-4 text-lg font-bold">
           <dt>Total</dt>
