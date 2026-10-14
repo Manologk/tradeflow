@@ -55,6 +55,8 @@ class Money implements Comparable<Money> {
     return Money(minor - other.minor, currency);
   }
 
+  Money operator -() => Money(-minor, currency);
+
   bool get isNegative => minor < 0;
 
   void _checkCurrency(Money other) {

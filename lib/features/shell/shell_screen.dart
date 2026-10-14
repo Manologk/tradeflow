@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/widgets.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
 import '../money/money_screen.dart';
 import '../purchases/buy_screen.dart';
+import '../reports/reports_screen.dart';
 import '../sales/sell_screen.dart';
 import '../settings/settings_screen.dart';
 
@@ -43,11 +43,11 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   Widget build(BuildContext context) {
     final storeName = ref.watch(storeProvider).value?.name ?? 'TradeFlow';
     final body = switch (_index) {
-      0 => const HomeScreen(),
+      0 => HomeScreen(onOpenTab: (i) => setState(() => _index = i)),
       1 => const BuyScreen(),
       2 => const SellScreen(),
       3 => const MoneyScreen(),
-      _ => const _ComingSoon(icon: Icons.insights_outlined, title: 'Reports'),
+      _ => const ReportsScreen(),
     };
 
     return Scaffold(
@@ -70,18 +70,4 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
       ),
     );
   }
-}
-
-class _ComingSoon extends StatelessWidget {
-  const _ComingSoon({required this.icon, required this.title});
-
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => EmptyState(
-    icon: icon,
-    title: '$title are coming in the next update',
-    message: 'This version sets up your business. Logging starts in the next release.',
-  );
 }

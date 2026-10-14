@@ -108,4 +108,16 @@ void main() {
     expect(ledger.stockOf('p').unitCostZmw, 300);
     expect(const ProductStock(qty: 0, valueZmw: 0).unitCostZmw, isNull);
   });
+
+  test('records which batches each demand used', () {
+    final ledger = fifo(
+      batches: [
+        batch('a', 1, 1, 100, purchase: 'p1'),
+        batch('b', 2, 5, 500, purchase: 'p2'),
+      ],
+      demands: [sale('s', 1, 3)],
+    );
+    final uses = ledger.demandCosts['s']!.uses;
+    expect(uses.map((u) => (u.batchId, u.units, u.costZmw)), [('a', 1, 100), ('b', 2, 200)]);
+  });
 }

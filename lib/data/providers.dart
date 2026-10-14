@@ -7,6 +7,7 @@ import 'database.dart';
 import 'money_repository.dart';
 import 'problems_repository.dart';
 import 'purchase_repository.dart';
+import 'report_repository.dart';
 import 'settings_repository.dart';
 import 'sales_repository.dart';
 import 'setup_repository.dart';
@@ -147,4 +148,21 @@ final saleAdjustmentsProvider = StreamProvider.family<List<Adjustment>, String>(
 
 final writeOffsProvider = StreamProvider.family<List<Adjustment>, String>(
   (ref, productId) => ref.watch(problemsRepositoryProvider).watchWriteOffs(productId),
+);
+
+final reportRepositoryProvider = Provider<ReportRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return ReportRepository(
+    ref.watch(databaseProvider),
+    store.id,
+    shipping: ref.watch(shippingRepositoryProvider),
+    stock: ref.watch(stockRepositoryProvider),
+    money: ref.watch(moneyRepositoryProvider),
+    sales: ref.watch(salesRepositoryProvider),
+  );
+});
+
+final snapshotProvider = StreamProvider<BusinessSnapshot>(
+  (ref) => ref.watch(reportRepositoryProvider).watchSnapshot(),
 );

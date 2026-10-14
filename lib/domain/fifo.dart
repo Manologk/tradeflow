@@ -41,11 +41,28 @@ class StockDemand {
   final Set<String> reservedPurchaseIds;
 }
 
+/// Units taken from one batch for one demand.
+class BatchUse {
+  const BatchUse({required this.batchId, required this.units, required this.costZmw});
+
+  final String batchId;
+  final int units;
+  final int costZmw;
+}
+
 class DemandCost {
-  const DemandCost({required this.costZmw, required this.unitsCosted, required this.unitsShort});
+  const DemandCost({
+    required this.costZmw,
+    required this.unitsCosted,
+    required this.unitsShort,
+    this.uses = const [],
+  });
 
   final int costZmw;
   final int unitsCosted;
+
+  /// Which batches the units came from (for profit by platform).
+  final List<BatchUse> uses;
 
   /// Units sold with no stock recorded to cost them against.
   final int unitsShort;
@@ -109,6 +126,12 @@ StockLedger fifo({required List<StockBatch> batches, required List<StockDemand> 
   }
 
   final costed = <String, (int units, int cost)>{};
+  final uses = <String, List<BatchUse>>{};
+  void record(String demandId, _Remaining r, int units, int cost) {
+    if (units > 0) {
+      uses.putIfAbsent(demandId, () => []).add(BatchUse(batchId: r.batch.id, units: units, costZmw: cost));
+    }
+  }
 
   // Pass 1: pre-orders take from the purchases bought for them.
   for (final d in demands.where((d) => d.reservedPurchaseIds.isNotEmpty)) {
@@ -117,6 +140,7 @@ StockLedger fifo({required List<StockBatch> batches, required List<StockDemand> 
       if (units == d.qty) break;
       if (!d.reservedPurchaseIds.contains(r.batch.purchaseId)) continue;
       final (u, c) = r.take(d.qty - units);
+      record(d.id, r, u, c);
       units += u;
       cost += c;
     }
@@ -134,6 +158,7 @@ StockLedger fifo({required List<StockBatch> batches, required List<StockDemand> 
     for (final r in byProduct[d.productId] ?? const <_Remaining>[]) {
       if (units == d.qty) break;
       final (u, c) = r.take(d.qty - units);
+      record(d.id, r, u, c);
       units += u;
       cost += c;
     }
@@ -159,6 +184,7 @@ StockLedger fifo({required List<StockBatch> batches, required List<StockDemand> 
           costZmw: costed[d.id]!.$2,
           unitsCosted: costed[d.id]!.$1,
           unitsShort: d.qty - costed[d.id]!.$1,
+          uses: uses[d.id] ?? const [],
         ),
     },
     stock: stock,

@@ -34,6 +34,13 @@ class StockRepository {
       .asyncMap((_) => computeLedger());
 
   Future<StockLedger> computeLedger() async {
+    final (batches, demands) = await loadStockInputs();
+    return fifo(batches: batches, demands: demands);
+  }
+
+  /// The batches and demands FIFO runs on, for callers that also need the
+  /// batch details (reports).
+  Future<(List<StockBatch>, List<StockDemand>)> loadStockInputs() async {
     final landed = await shipping.computeLandedCosts();
 
     // When each purchase was collected (its stock's received date).
@@ -132,6 +139,6 @@ class StockRepository {
       for (final w in writeOffs)
         StockDemand(id: w.id, productId: w.productId!, at: w.occurredAt, qty: w.qty ?? 0),
     ]);
-    return fifo(batches: batches, demands: demands);
+    return (batches, demands);
   }
 }

@@ -8,6 +8,10 @@ import 'package:tradeflow/data/providers.dart';
 
 void main() {
   testWidgets('first run sets up the store and lands on Home', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.5;
+    addTearDown(tester.view.reset);
+
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
