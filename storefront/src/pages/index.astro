@@ -55,12 +55,11 @@ function link(change: Record<string, string | null>) {
 
             {!categoryId && !seriesId && !query && !inStockOnly && (
               <section class="mx-5 mt-4 flex items-center gap-4 rounded-[28px] bg-brand p-4 text-ink-deep md:mx-8 md:gap-8 md:px-8 md:py-6">
-                <img src="/brand/logo.webp" alt="Anime Yahh! Otaku approved" width="282" height="257" class="h-28 w-auto shrink-0 md:h-40" />
+                <img src="/brand/logo-badge.webp" alt="AnimeYay, otaku approved" width="282" height="195" class="h-24 w-auto shrink-0 md:h-36" />
                 <div>
                   <p class="display text-3xl leading-none text-balance md:text-5xl">Anime merch for real otakus</p>
                   <p class="mt-1.5 text-sm md:mt-3 md:text-base">
-                    Jerseys, figures and accessories. Order on WhatsApp
-                    {catalog.settings.deliveryAreas.length === 0 ? ', delivery included.' : '.'}
+                    Jerseys, figures and accessories{catalog.settings.deliveryAreas.length === 0 ? ', delivery included.' : '.'}
                   </p>
                 </div>
               </section>
