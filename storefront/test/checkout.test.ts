@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildOrder, depositFor, localPhone, newOrderCode, normalisePhone, priceLines, totalsFor, whatsappLink, whatsappMessage } from '../src/lib/checkout';
-import { cachedCatalog, type ShopData } from '../src/lib/data';
+import { cachedCatalog, ShopNotConfigured, type ShopData } from '../src/lib/data';
+import { supabaseShop } from '../src/lib/supabase';
 import { testCatalog } from '../src/lib/fixtures';
 import { kwacha } from '../src/lib/money';
 import type { OrderLine } from '../src/lib/models';
@@ -140,5 +141,14 @@ describe('catalog cache', () => {
     clock = 61_000;
     await shop.loadCatalog();
     expect(calls).toBe(3);
+  });
+});
+
+describe('supabaseShop', () => {
+  it('reports "not set up" until the shop settings exist', async () => {
+    const fetchFn = (async () => new Response('[]', { status: 200 })) as typeof fetch;
+    await expect(supabaseShop('https://x.supabase.co', 'key', fetchFn).loadCatalog()).rejects.toBeInstanceOf(
+      ShopNotConfigured,
+    );
   });
 });

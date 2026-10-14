@@ -24,4 +24,4 @@ Release builds are signed with the key provided through the `TRADEFLOW_KEYSTORE*
 
 ## Storefront
 
-The online shop lives in [`storefront/`](storefront/README.md): an Astro website for Cloudflare Pages that reads its catalog from Supabase.
+The online shop lives in [`storefront/`](storefront/README.md): an Astro website on Cloudflare that reads its catalog from Supabase.

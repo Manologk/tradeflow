@@ -25,16 +25,26 @@ npm run dev
 
 ## Settings
 
+The live Supabase address and its public (anon) key are in `wrangler.jsonc`. They are safe to publish:
+row-level security limits that key to the published catalog and the two order functions. The
+`service_role` key never goes in this repo or in the site.
+
 | Name | Where | Value |
 |---|---|---|
-| `SUPABASE_URL` | Cloudflare Pages → Settings → Variables and secrets | Supabase project URL |
-| `SUPABASE_ANON_KEY` | same | Supabase **anon / public** key (never the `service_role` key) |
-| `SHOP_DATA` | `.dev.vars` only | `fixtures` to use the test catalog; leave unset in production |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | `wrangler.jsonc` | Supabase project `tradeflow-shop` |
+| `SHOP_DATA` | `.dev.vars` only | `fixtures` to use the test catalog |
 
-Without Supabase settings the site shows "Opening soon" instead of breaking.
+Without shop settings in the database the site shows "Opening soon" instead of breaking.
+
+## Database
+
+Schema, security rules and order functions: [`../supabase/migrations`](../supabase/migrations).
 
 ## Deploy (free)
 
-1. Cloudflare dashboard → Workers & Pages → Create → Pages → connect this GitHub repo.
-2. Root directory `storefront`, build command `npx -y npm@11.20.0 ci && npm run build`, output `dist`.
-3. Add the two Supabase settings above, then deploy. Every push to the chosen branch redeploys.
+The site runs as a Cloudflare Worker (free plan: 100,000 requests a day, commercial use allowed).
+
+1. Cloudflare dashboard → **Workers & Pages → Create → Import a repository** → pick this repo.
+2. Root directory `storefront`, build command `npx -y npm@11.20.0 ci && npm run build`,
+   deploy command `npx wrangler deploy`.
+3. Choose the branch to publish. Every push to it redeploys.

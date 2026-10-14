@@ -1,4 +1,4 @@
-import type { ShopData } from './data';
+import { ShopNotConfigured, type ShopData } from './data';
 import type { Availability, Catalog, Order, OrderStatus, ShopColor } from './models';
 
 // Reads the shop tables published by the admin app through Supabase's REST API
@@ -57,7 +57,8 @@ export function supabaseShop(url: string, anonKey: string, fetchFn: typeof fetch
         get<ProductRow[]>('shop_products?select=*&order=sort_order,name'),
       ]);
       const s = settings[0];
-      if (!s) throw new Error('Shop settings not published yet');
+      // No settings yet means the owner hasn't set the shop up: show "Opening soon".
+      if (!s) throw new ShopNotConfigured();
       return {
         settings: {
           name: s.name,

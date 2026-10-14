@@ -2,5 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tradeflow-shop",
   // Pinned so builds don't drift with the date they run on.
-  "compatibility_date": "2026-09-15"
+  "compatibility_date": "2026-09-15",
+  "vars": {
+    // Public by design: Supabase's anon key only gets what the database's
+    // row-level security allows (published catalog, the two order functions).
+    "SUPABASE_URL": "https://agdyfarmftseuztzqnbh.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZHlmYXJtZnRzZXV6dHpxbmJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5ODEyMDYsImV4cCI6MjEwNzU1NzIwNn0.lFmhnxX4YvLvdaksDdCaJerQwLsOrEfsIYvMuR5hhkE"
+  }
 }

@@ -21,7 +21,7 @@ Design reference: Figma "ChicCraze – eCommerce Clothing Store App" (NAM Design
 | S3 | Checkout | **WhatsApp order.** Cart → "Order on WhatsApp" opens a pre-filled message to the shop; the order is also saved online and pulled into the admin. Payment by mobile money or on delivery, recorded in the admin. |
 | S4 | What's shown | **In stock + pre-order.** Pre-order items say "Pre-order · arrives in ~N weeks" (lead time set per product). |
 | S5 | Accounts | **Guest checkout.** Name, phone, delivery area at checkout. "My orders" looks orders up by phone number + order code. |
-| S6 | Hosting / cloud | **Free tiers:** Supabase (database, photo storage) + **Cloudflare Pages** (site and its small server functions; free plan allows commercial use, unlike Vercel's). Supabase's free project pauses after 7 days without traffic. |
+| S6 | Hosting / cloud | **Free tiers:** Supabase (database, photo storage) + **Cloudflare Workers** (site and its small server functions; free plan allows commercial use, unlike Vercel's). Supabase's free project pauses after 7 days without traffic. |
 | S7 | Ratings & reviews | **Dropped** from the template (fake numbers). Can return later as real reviews. |
 | S8 | Browsing | Filter by **category** and by **anime series** (Naruto, One Piece, Demon Slayer, …), plus search. |
 | S9 | Variants | Size / colour chips appear **only** for products that have variants (clothing). |
@@ -97,10 +97,10 @@ Added in the same style:
 | # | Milestone | Done when |
 |---|---|---|
 | S-M1 ✅ | Storefront UI behind a catalog/order interface | All screens built to the design; cart & WhatsApp message work (tested with test fixtures) |
-| S-M2 | Supabase schema + RLS + storage | Catalog readable anonymously; orders insertable; security tests pass |
+| S-M2 ✅ | Supabase schema + RLS + storage | Catalog readable anonymously; orders insertable; security tests pass |
 | S-M3 | Admin: shop fields, lists, publish to cloud | Products with photos appear on the site |
 | S-M4 | Orders into admin | Website order shows in admin inbox; confirm creates sale; status visible in "My orders" |
-| S-M5 | Deploy | Site live on Cloudflare Pages with a shareable link |
+| S-M5 | Deploy | Site live on Cloudflare with a shareable link |
 
 ## 9. Needed from the owner
 
