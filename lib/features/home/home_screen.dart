@@ -12,9 +12,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final places = ref.watch(moneyPlacesProvider).value ?? const [];
-    final active = places.where((p) => !p.archived).toList();
-    final total = active.fold<int>(0, (sum, p) => sum + p.openingBalanceZmw);
+    final balances = ref.watch(balancesProvider).value ?? const [];
+    final active = balances.where((b) => !b.place.archived).toList();
+    final total = active.fold<int>(0, (sum, b) => sum + b.balanceZmw);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -29,13 +29,13 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(Money(total).toString(), style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 12),
-                for (final place in active)
+                for (final b in active)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        Expanded(child: Text(place.name)),
-                        Text(Money(place.openingBalanceZmw).toString()),
+                        Expanded(child: Text(b.place.name)),
+                        Text(Money(b.balanceZmw).toString()),
                       ],
                     ),
                   ),

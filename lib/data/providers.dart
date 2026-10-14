@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database.dart';
+import 'money_repository.dart';
+import 'purchase_repository.dart';
 import 'settings_repository.dart';
 import 'setup_repository.dart';
 
@@ -33,4 +35,32 @@ final moneyPlacesProvider = StreamProvider<List<MoneyPlace>>(
 
 final agentsProvider = StreamProvider<List<Agent>>(
   (ref) => ref.watch(settingsRepositoryProvider).watchAgents(),
+);
+
+final purchaseRepositoryProvider = Provider<PurchaseRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return PurchaseRepository(ref.watch(databaseProvider), store.id);
+});
+
+final moneyRepositoryProvider = Provider<MoneyRepository>((ref) {
+  final store = ref.watch(storeProvider).value;
+  if (store == null) throw StateError('Store not set up yet');
+  return MoneyRepository(ref.watch(databaseProvider), store.id);
+});
+
+final purchasesProvider = StreamProvider<List<PurchaseSummary>>(
+  (ref) => ref.watch(purchaseRepositoryProvider).watchPurchases(),
+);
+
+final purchaseDetailProvider = StreamProvider.family<PurchaseDetail?, String>(
+  (ref, id) => ref.watch(purchaseRepositoryProvider).watchPurchase(id),
+);
+
+final productsProvider = StreamProvider<List<ProductSummary>>(
+  (ref) => ref.watch(purchaseRepositoryProvider).watchProducts(),
+);
+
+final balancesProvider = StreamProvider<List<PlaceBalance>>(
+  (ref) => ref.watch(moneyRepositoryProvider).watchBalances(),
 );

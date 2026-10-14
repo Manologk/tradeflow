@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
+import '../purchases/buy_screen.dart';
 import '../settings/settings_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
@@ -34,7 +35,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     final storeName = ref.watch(storeProvider).value?.name ?? 'TradeFlow';
     final body = switch (_index) {
       0 => const HomeScreen(),
-      1 => const _ComingSoon(icon: Icons.shopping_bag_outlined, title: 'Purchases'),
+      1 => const BuyScreen(),
       2 => const _ComingSoon(icon: Icons.sell_outlined, title: 'Sales'),
       3 => const _ComingSoon(icon: Icons.account_balance_wallet_outlined, title: 'Money'),
       _ => const _ComingSoon(icon: Icons.insights_outlined, title: 'Reports'),

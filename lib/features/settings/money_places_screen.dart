@@ -128,6 +128,7 @@ class _PlaceDialogState extends State<_PlaceDialog> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<MoneyPlaceKind>(
+              isExpanded: true,
               initialValue: _kind,
               decoration: const InputDecoration(labelText: 'Type'),
               items: [
