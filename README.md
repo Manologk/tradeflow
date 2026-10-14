@@ -2,7 +2,7 @@
 
 Offline Android app for tracking China import purchases, shipping, stock, sales and profit — built for traders who buy on Taobao, Pinduoduo, 1688 and friends and resell locally.
 
-See [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) for the full MVP spec and milestones.
+See [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) for the admin app spec and [docs/STOREFRONT_SPEC.md](docs/STOREFRONT_SPEC.md) for the online shop.
 
 ## Install
 
