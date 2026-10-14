@@ -46,14 +46,25 @@ function link(change: Record<string, string | null>) {
         return (
           <>
             <header class="flex items-center gap-3 px-5 pt-5 md:px-8 md:pt-8">
-              <div class="flex-1">
-                <p class="text-[13px] text-grey">Hello, welcome 👋</p>
-                <h1 class="text-xl font-bold">{catalog.settings.name}</h1>
-              </div>
+              <img src="/brand/icon-192.png" alt="" width="40" height="40" class="size-10 rounded-xl" />
+              <h1 class="flex-1 text-xl font-bold">{catalog.settings.name}</h1>
               <a href="/browse" class="circle-btn" aria-label="Browse by series">
                 <Icon name="grid" size={20} />
               </a>
             </header>
+
+            {!categoryId && !seriesId && !query && !inStockOnly && (
+              <section class="mx-5 mt-4 flex items-center gap-4 rounded-[28px] bg-brand p-4 text-ink-deep md:mx-8 md:gap-8 md:px-8 md:py-6">
+                <img src="/brand/logo.webp" alt="Anime Yahh! Otaku approved" width="282" height="257" class="h-28 w-auto shrink-0 md:h-40" />
+                <div>
+                  <p class="text-lg leading-tight font-bold text-balance md:text-3xl">Anime merch for real otakus</p>
+                  <p class="mt-1.5 text-sm md:mt-3 md:text-base">
+                    Jerseys, figures and accessories. Order on WhatsApp
+                    {catalog.settings.deliveryAreas.length === 0 ? ', delivery included.' : '.'}
+                  </p>
+                </div>
+              </section>
+            )}
 
             <form action="/" method="get" role="search" class="mt-5 flex gap-3 px-5 md:max-w-xl md:px-8">
               {categoryId && <input type="hidden" name="category" value={categoryId} />}

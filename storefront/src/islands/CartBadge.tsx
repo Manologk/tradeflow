@@ -18,7 +18,7 @@ export default function CartBadge() {
   return (
     <a href="/cart" class="relative grid size-12 place-items-center rounded-full text-white" aria-label={count ? `Cart, ${count} items` : 'Cart'}>
       <Icon name="bag" size={24} />
-      {count > 0 && <span class="absolute top-2.5 right-2.5 size-2.5 rounded-full border-[1.5px] border-ink bg-sale" />}
+      {count > 0 && <span class="absolute top-2.5 right-2.5 size-2.5 rounded-full border-[1.5px] border-ink bg-brand" />}
     </a>
   );
 }

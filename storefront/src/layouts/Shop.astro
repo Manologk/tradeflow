@@ -13,21 +13,25 @@ interface Props {
 const { title, description = 'Browse anime merch and order on WhatsApp.', image = null, tab = null } = Astro.props;
 const showBar = tab !== null;
 const tabClass = (on: boolean) =>
-  `grid size-12 place-items-center rounded-full text-white ${on ? 'bg-white/15' : ''}`;
+  `grid size-12 place-items-center rounded-full ${on ? 'bg-brand text-ink-deep' : 'text-white'}`;
+// Link previews (WhatsApp, Facebook) need a full address for the picture.
+const ogImage = new URL(image ?? '/brand/icon-512.png', Astro.url).href;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#292526" />
+    <meta name="theme-color" content="#fd7312" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    {image && <meta property="og:image" content={image} />}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:image" content={ogImage} />
+    <link rel="icon" href="/brand/icon-48.png" sizes="48x48" type="image/png" />
+    <link rel="icon" href="/brand/icon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/brand/icon-180.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preload" href="/fonts/encode-sans-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/encode-sans-600.woff2" as="font" type="font/woff2" crossorigin />

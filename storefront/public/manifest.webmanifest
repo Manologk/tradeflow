@@ -1,10 +1,13 @@
 {
-  "name": "Anime Merch Shop",
-  "short_name": "Shop",
-  "description": "Browse anime merch and order on WhatsApp.",
+  "name": "AnimeYay",
+  "short_name": "AnimeYay",
+  "description": "Anime merch. Order on WhatsApp.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#292526",
-  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "theme_color": "#fd7312",
+  "icons": [
+    { "src": "/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
 }
