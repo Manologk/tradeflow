@@ -3,6 +3,9 @@
   "name": "tradeflow-shop",
   // Pinned so builds don't drift with the date they run on.
   "compatibility_date": "2026-09-15",
+  // kryptera.cc is on the same Cloudflare account, so deploying creates the
+  // DNS record and certificate for this subdomain.
+  "routes": [{ "pattern": "animeyay.kryptera.cc", "custom_domain": true }],
   "vars": {
     // Public by design: Supabase's anon key only gets what the database's
     // row-level security allows (published catalog, the two order functions).

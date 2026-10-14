@@ -48,3 +48,5 @@ The site runs as a Cloudflare Worker (free plan: 100,000 requests a day, commerc
 2. Root directory `storefront`, build command `npx -y npm@11.20.0 ci && npm run build`,
    deploy command `npx wrangler deploy`.
 3. Choose the branch to publish. Every push to it redeploys.
+
+The shop is served at **https://animeyay.kryptera.cc** (set in `wrangler.jsonc`).
