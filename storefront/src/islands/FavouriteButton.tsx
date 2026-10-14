@@ -9,7 +9,7 @@ export default function FavouriteButton({ productId, size = 32 }: { productId: s
   return (
     <button
       type="button"
-      class="grid place-items-center rounded-full bg-ink text-white"
+      class={`grid place-items-center rounded-full ${on ? 'bg-brand text-ink-deep' : 'bg-ink text-white'}`}
       style={{ width: size, height: size }}
       aria-pressed={on}
       aria-label={on ? 'Remove from favourites' : 'Add to favourites'}

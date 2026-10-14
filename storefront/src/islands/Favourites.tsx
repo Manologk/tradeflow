@@ -19,7 +19,7 @@ export default function Favourites({ products }: { products: Slim[] }) {
         <div class="grid size-18 place-items-center rounded-full bg-surface text-grey">
           <Icon name="heart" size={32} />
         </div>
-        <h2 class="mt-4 text-lg font-semibold">No favourites yet</h2>
+        <h2 class="display mt-4 text-2xl">No favourites yet</h2>
         <p class="mt-2 muted">Tap the heart on anything you like to save it here.</p>
       </div>
     );

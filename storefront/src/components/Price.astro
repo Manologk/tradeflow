@@ -9,6 +9,6 @@ interface Props {
 const { product, large = false } = Astro.props;
 ---
 <span class="inline-flex items-baseline gap-1.5 tabular-nums">
-  <span class={`font-semibold ${large ? 'text-xl' : 'text-[15px]'}`}>{kwacha(product.priceZmw)}</span>
+  <span class={`display ${large ? 'text-3xl' : 'text-xl'}`}>{kwacha(product.priceZmw)}</span>
   {isOnSale(product) && <s class="text-xs text-grey">{kwacha(product.compareAtZmw!)}</s>}
 </span>

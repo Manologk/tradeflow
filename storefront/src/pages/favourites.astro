@@ -11,7 +11,7 @@ const products = result.ok
 ---
 <Shop title="Favourites" tab="favourites">
   <div class="px-5 pt-5 md:px-8 md:pt-8">
-    <h1 class="mb-4 text-2xl font-bold">Favourites</h1>
+    <h1 class="display mb-4 text-3xl">Favourites</h1>
     {!result.ok ? <ShopState kind={result.kind} /> : <Favourites client:load products={products} />}
   </div>
 </Shop>

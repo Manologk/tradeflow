@@ -51,7 +51,7 @@ const photoCount = Math.max(1, product?.photos.length ?? 0);
         </div>
 
         <div>
-        <h1 class="mt-6 text-2xl leading-tight font-semibold text-balance md:mt-0 md:text-3xl">{product.name}</h1>
+        <h1 class="display mt-6 text-4xl leading-none text-balance md:mt-0 md:text-5xl">{product.name}</h1>
         <p class="mt-1.5 muted">{[series?.name, category?.name].filter(Boolean).join(' · ')}</p>
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
           <Price product={product} large />

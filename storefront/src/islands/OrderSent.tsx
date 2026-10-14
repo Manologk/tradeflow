@@ -17,10 +17,10 @@ export default function OrderSent({ code }: { code: string }) {
 
   return (
     <div class="px-6 pt-10 pb-10">
-      <div class="mx-auto grid size-22 place-items-center rounded-full bg-ink text-white">
+      <div class="mx-auto grid size-22 place-items-center rounded-full bg-brand text-ink-deep">
         <Icon name="check" size={44} />
       </div>
-      <h1 class="mt-6 text-center text-2xl font-bold text-balance">{state ? 'One more step' : 'Order placed'}</h1>
+      <h1 class="display mt-6 text-center text-4xl text-balance">{state ? 'One more step' : 'Order placed'}</h1>
       <p class="mt-2 text-center muted">
         Your order code is <strong class="text-ink-deep">{code}</strong>
       </p>
@@ -32,11 +32,11 @@ export default function OrderSent({ code }: { code: string }) {
       )}
 
       <div class="mt-6 rounded-2xl bg-surface p-4">
-        <h2 class="font-semibold">What happens next</h2>
+        <h2 class="display text-xl">What happens next</h2>
         <ol class="mt-2 grid gap-2">
           {['Send the message in WhatsApp so we get your order.', 'We confirm availability and share payment details.', 'Track it any time under My orders.'].map((t, i) => (
             <li class="flex gap-2.5">
-              <span class="grid size-5.5 shrink-0 place-items-center rounded-full bg-ink text-xs text-white">{i + 1}</span>
+              <span class="grid size-5.5 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-ink-deep">{i + 1}</span>
               <span>{t}</span>
             </li>
           ))}
@@ -56,7 +56,7 @@ export default function OrderSent({ code }: { code: string }) {
               <dd>{kwacha(l.qty * l.unitPriceZmw)}</dd>
             </div>
           ))}
-          <div class="mt-2 flex justify-between border-t border-line pt-3 font-bold">
+          <div class="display mt-2 flex justify-between border-t border-line pt-3 text-xl">
             <dt>Total</dt>
             <dd>{kwacha(orderTotal(order))}</dd>
           </div>

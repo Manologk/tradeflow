@@ -58,7 +58,7 @@ export default function ProductOptions(p: Props) {
                       setMessage(null);
                     }}
                     class={`grid h-10 min-w-10 place-items-center rounded-full border px-2 text-sm font-semibold ${
-                      size === s ? 'border-ink bg-ink text-white' : 'border-line bg-white'
+                      size === s ? 'border-brand bg-brand text-ink-deep' : 'border-line bg-white'
                     }`}
                   >
                     {s}

@@ -46,7 +46,7 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
         <div class="grid size-18 place-items-center rounded-full bg-surface text-grey">
           <Icon name="bag" size={32} />
         </div>
-        <h2 class="mt-4 text-lg font-semibold">Your cart is empty</h2>
+        <h2 class="display mt-4 text-2xl">Your cart is empty</h2>
         <p class="mt-2 muted">Find something you love and add it here.</p>
         <a href="/" class="btn-primary mt-6 max-w-56">
           Start shopping
@@ -132,7 +132,7 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
         </p>
       )}
 
-      <h2 class="mt-7 mb-3 text-base font-semibold">Delivery information</h2>
+      <h2 class="display mt-7 mb-3 text-xl">Delivery information</h2>
       <div class="grid gap-3">
         <label class="grid gap-1">
           <span class="sr-only">Your name</span>
@@ -184,7 +184,7 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
           {/* No delivery areas set up means delivery is part of the price. */}
           <dd class="font-semibold">{settings.deliveryAreas.length ? kwacha(totals.deliveryZmw) : 'Included'}</dd>
         </div>
-        <div class="mt-2 flex justify-between border-t border-line pt-4 text-lg font-bold">
+        <div class="display mt-2 flex justify-between border-t border-line pt-4 text-2xl">
           <dt>Total</dt>
           <dd>{kwacha(totals.totalZmw)}</dd>
         </div>

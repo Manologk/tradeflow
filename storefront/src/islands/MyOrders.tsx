@@ -59,7 +59,7 @@ export default function MyOrders() {
         <div class="grid size-18 place-items-center rounded-full bg-surface text-grey">
           <Icon name="receipt" size={32} />
         </div>
-        <h2 class="mt-4 text-lg font-semibold">No orders yet</h2>
+        <h2 class="display mt-4 text-2xl">No orders yet</h2>
         <p class="mt-2 muted">Orders you place from this phone show up here.</p>
         <a href="/" class="btn-primary mt-6 max-w-56">
           Start shopping
@@ -76,7 +76,7 @@ export default function MyOrders() {
         return (
           <div key={o.code} class="flex items-center gap-3 rounded-2xl border border-[#ededed] p-4">
             <div class="min-w-0 flex-1">
-              <p class="text-base font-bold">{o.code}</p>
+              <p class="display text-xl">{o.code}</p>
               <p class="text-sm muted tabular-nums">
                 {date.format(new Date(o.createdAt))} · {o.units} {o.units === 1 ? 'item' : 'items'} · {kwacha(o.totalZmw)}
               </p>

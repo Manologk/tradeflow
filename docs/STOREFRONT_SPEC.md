@@ -26,11 +26,14 @@ Design reference: Figma "ChicCraze – eCommerce Clothing Store App" (NAM Design
 | S8 | Browsing | Filter by **category** and by **anime series** (Naruto, One Piece, Demon Slayer, …), plus search. |
 | S9 | Variants | Size / colour chips appear **only** for products that have variants (clothing). |
 
-## 3. Visual language (from the Figma style guide)
+## 3. Visual language (Figma layout, AnimeYay branding)
 
-- Font: **Encode Sans** (Google Fonts).
-- Colours: primary dark `#292526`, grey `#787676`, light grey `#A3A1A2`, surface `#F2F2F2`, near-black `#121111`,
-  rating/accent yellow; white background.
+- Brand: "Anime Yahh!" logo (black on orange) on the home banner; AY hexagon mark as the site icon.
+- Fonts: **Bangers** for headings and prices (comic lettering, like the logo), **Barlow** for text (sporty,
+  readable). Both OFL, bundled with the site.
+- Colours: brand orange `#FD7312` (main buttons, selected chips and sizes, active menu item), deep orange
+  `#B84500` for orange text on white, near-black `#121111`, warm surface `#F6F1EC`, grey `#787676`; white
+  background.
 - Shapes: large rounded product cards (~16–20px), pill buttons and chips, circular icon buttons, floating rounded
   bottom bar.
 - Icons: Vuesax-style outline icons.

@@ -47,7 +47,7 @@ function link(change: Record<string, string | null>) {
           <>
             <header class="flex items-center gap-3 px-5 pt-5 md:px-8 md:pt-8">
               <img src="/brand/icon-192.png" alt="" width="40" height="40" class="size-10 rounded-xl" />
-              <h1 class="flex-1 text-xl font-bold">{catalog.settings.name}</h1>
+              <h1 class="display flex-1 text-3xl">{catalog.settings.name}</h1>
               <a href="/browse" class="circle-btn" aria-label="Browse by series">
                 <Icon name="grid" size={20} />
               </a>
@@ -57,7 +57,7 @@ function link(change: Record<string, string | null>) {
               <section class="mx-5 mt-4 flex items-center gap-4 rounded-[28px] bg-brand p-4 text-ink-deep md:mx-8 md:gap-8 md:px-8 md:py-6">
                 <img src="/brand/logo.webp" alt="Anime Yahh! Otaku approved" width="282" height="257" class="h-28 w-auto shrink-0 md:h-40" />
                 <div>
-                  <p class="text-lg leading-tight font-bold text-balance md:text-3xl">Anime merch for real otakus</p>
+                  <p class="display text-3xl leading-none text-balance md:text-5xl">Anime merch for real otakus</p>
                   <p class="mt-1.5 text-sm md:mt-3 md:text-base">
                     Jerseys, figures and accessories. Order on WhatsApp
                     {catalog.settings.deliveryAreas.length === 0 ? ', delivery included.' : '.'}
@@ -78,7 +78,7 @@ function link(change: Record<string, string | null>) {
               <details class="group relative">
                 <summary class="relative grid size-[50px] cursor-pointer list-none place-items-center rounded-full bg-ink text-white [&::-webkit-details-marker]:hidden" aria-label="Filters">
                   <Icon name="sliders" size={22} />
-                  {filtersOn && <span class="absolute top-1 right-1 size-2.5 rounded-full border-2 border-white bg-sale" />}
+                  {filtersOn && <span class="absolute top-1 right-1 size-2.5 rounded-full border-2 border-white bg-brand" />}
                 </summary>
                 <div class="absolute top-14 right-0 z-30 w-[min(18rem,calc(100vw-2.5rem))] rounded-2xl border border-line bg-white p-4 shadow-xl">
                   <p class="font-semibold">Anime series</p>
@@ -93,7 +93,7 @@ function link(change: Record<string, string | null>) {
                       <span class="block font-medium">In stock only</span>
                       <span class="block text-sm muted">Hide pre-order items</span>
                     </span>
-                    <span class={`relative h-7 w-12 rounded-full transition ${inStockOnly ? 'bg-ink' : 'bg-line'}`}>
+                    <span class={`relative h-7 w-12 rounded-full transition ${inStockOnly ? 'bg-brand' : 'bg-line'}`}>
                       <span class={`absolute top-1 size-5 rounded-full bg-white transition ${inStockOnly ? 'left-6' : 'left-1'}`} />
                     </span>
                   </a>
@@ -132,7 +132,7 @@ function link(change: Record<string, string | null>) {
                 <div class="grid size-18 place-items-center rounded-full bg-surface text-grey">
                   <Icon name="search" size={32} />
                 </div>
-                <h2 class="mt-4 text-lg font-semibold">Nothing found</h2>
+                <h2 class="display mt-4 text-2xl">Nothing found</h2>
                 <p class="mt-2 muted">Try another search or clear the filters.</p>
                 <a href="/" class="btn-outline mt-6 max-w-48">Clear filters</a>
               </div>

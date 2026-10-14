@@ -11,7 +11,7 @@ const lead = product.leadTimeWeeks ? ` · arrives in ~${product.leadTimeWeeks} w
 const [icon, text, tone] = {
   inStock: ['checkCircle', 'In stock', 'text-grey'],
   fewLeft: ['flame', 'Only a few left', 'text-sale'],
-  preOrder: ['clock', compact ? 'Pre-order' : `Pre-order${lead}`, 'text-ink'],
+  preOrder: ['clock', compact ? 'Pre-order' : `Pre-order${lead}`, 'text-brand-deep'],
   soldOut: ['block', 'Sold out', 'text-grey'],
 }[product.availability] as ['checkCircle' | 'flame' | 'clock' | 'block', string, string];
 ---

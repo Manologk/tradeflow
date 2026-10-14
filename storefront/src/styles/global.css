@@ -6,36 +6,44 @@
   --color-ink-deep: #121111;
   --color-grey: #787676;
   --color-grey-light: #a3a1a2;
-  --color-surface: #f2f2f2;
-  --color-line: #e6e5e5;
+  --color-surface: #f6f1ec;
+  --color-line: #ebe4de;
   --color-sale: #d64545;
-  /* AnimeYay orange, from the logo. */
+  /* AnimeYay orange, from the logo. Use brand-deep for orange text on white
+     (plain brand orange is too light to read there). */
   --color-brand: #fd7312;
+  --color-brand-deep: #b84500;
+  --color-brand-soft: #fff1e6;
   --color-page: #ffffff;
   --color-backdrop: #f6f6f7;
-  --font-sans: "Encode Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Comic-style headings, in the spirit of the logo lettering. */
+  --font-display: "Bangers", "Impact", "Arial Narrow Bold", sans-serif;
 }
 
-@font-face { font-family: "Encode Sans"; font-weight: 400; font-display: swap; src: url("/fonts/encode-sans-400.woff2") format("woff2"); }
-@font-face { font-family: "Encode Sans"; font-weight: 500; font-display: swap; src: url("/fonts/encode-sans-500.woff2") format("woff2"); }
-@font-face { font-family: "Encode Sans"; font-weight: 600; font-display: swap; src: url("/fonts/encode-sans-600.woff2") format("woff2"); }
-@font-face { font-family: "Encode Sans"; font-weight: 700; font-display: swap; src: url("/fonts/encode-sans-700.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("/fonts/barlow-400.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("/fonts/barlow-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("/fonts/barlow-600.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url("/fonts/barlow-700.woff2") format("woff2"); }
+@font-face { font-family: "Bangers"; font-weight: 400; font-display: swap; src: url("/fonts/bangers-400.woff2") format("woff2"); }
 
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body { @apply bg-page text-ink-deep font-sans antialiased; }
-  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--color-brand-deep); outline-offset: 2px; }
   button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @layer components {
   .pill { @apply inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-[15px] font-medium whitespace-nowrap; }
-  .pill-on { @apply border-ink bg-ink text-white; }
-  .btn-primary { @apply flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-ink text-base font-semibold text-white disabled:opacity-40; }
+  .pill-on { @apply border-brand bg-brand text-ink-deep font-semibold; }
+  .btn-primary { @apply flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-brand text-[17px] font-bold text-ink-deep disabled:opacity-40; }
   .btn-outline { @apply flex h-13 w-full items-center justify-center gap-2.5 rounded-full border border-line bg-white text-base font-semibold; }
   .circle-btn { @apply grid size-11 place-items-center rounded-full border border-line bg-white; }
-  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3.5 text-base placeholder:text-grey-light focus:border-ink focus:outline-none; }
+  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3.5 text-base placeholder:text-grey-light focus:border-brand focus:outline-none; }
   .muted { @apply text-grey; }
+  /* Bangers has one weight, so no bold on top of it. */
+  .display { @apply font-display font-normal tracking-wide; }
 }
 
 @media (prefers-reduced-motion: reduce) {
