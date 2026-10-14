@@ -54,11 +54,12 @@ function link(change: Record<string, string | null>) {
             </header>
 
             {!categoryId && !seriesId && !query && !inStockOnly && (
-              <section class="mx-5 mt-4 flex items-center gap-4 rounded-[28px] bg-brand p-4 text-ink-deep md:mx-8 md:gap-8 md:px-8 md:py-6">
-                <img src="/brand/logo-badge.webp" alt="AnimeYay, otaku approved" width="282" height="195" class="h-24 w-auto shrink-0 md:h-36" />
+              <section class="rise relative mx-5 mt-4 flex items-center gap-4 overflow-hidden rounded-[28px] bg-brand p-4 text-ink-deep md:mx-8 md:gap-8 md:px-8 md:py-6">
+                <span class="banner-shine" aria-hidden="true" />
+                <img src="/brand/logo-badge.webp" alt="AnimeYay, otaku approved" width="282" height="195" class="h-24 w-auto shrink-0 animate-float md:h-36" />
                 <div>
-                  <p class="display text-3xl leading-none text-balance md:text-5xl">Anime merch for real otakus</p>
-                  <p class="mt-1.5 text-sm md:mt-3 md:text-base">
+                  <p class="display rise text-3xl leading-none text-balance md:text-5xl" style="--i: 2">Anime merch for real otakus</p>
+                  <p class="rise mt-1.5 text-sm md:mt-3 md:text-base" style="--i: 3">
                     Jerseys, figures and accessories{catalog.settings.deliveryAreas.length === 0 ? ', delivery included.' : '.'}
                   </p>
                 </div>
@@ -137,7 +138,7 @@ function link(change: Record<string, string | null>) {
               </div>
             ) : (
               <ul class="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 px-5 sm:grid-cols-3 md:px-8 lg:grid-cols-4 lg:gap-x-6">
-                {products.map((p) => <ProductCard product={p} seriesName={seriesName(p.seriesId)} />)}
+                {products.map((p, i) => <ProductCard product={p} seriesName={seriesName(p.seriesId)} index={i} />)}
               </ul>
             )}
           </>

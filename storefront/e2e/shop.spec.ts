@@ -88,3 +88,18 @@ test('pages never scroll sideways', async ({ page }) => {
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+test('hovering a product offers quick buy (desktop)', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'Phones have no hover; they open the product page.');
+  await page.goto('/');
+  // Products with colours still need the product page.
+  await expect(page.locator('[data-quick="p2"]')).toHaveCount(0);
+
+  const card = page.locator('li', { has: page.locator('[data-quick="p1"]') });
+  await card.hover();
+  await card.getByRole('button', { name: /Add Naruto Sage Mode Figure to cart/ }).click();
+  await expect(page.getByRole('link', { name: 'Cart, 1 items' })).toBeVisible();
+  await card.getByRole('button', { name: /Buy now/ }).click();
+  await expect(page).toHaveURL(/\/cart$/);
+  await expect(page.getByText('Total (2 items)')).toBeVisible();
+});

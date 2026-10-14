@@ -92,14 +92,14 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
   return (
     <form onSubmit={order} noValidate class="px-5 pb-10">
       <ul>
-        {lines.map((line) => {
+        {lines.map((line, i) => {
           const p = productOf(line.productId);
           if (!p || p.availability === 'soldOut') return null;
           const options = [line.size ? `Size ${line.size}` : null, line.color, p.availability === 'preOrder' ? 'Pre-order' : null]
             .filter(Boolean)
             .join(' · ');
           return (
-            <li key={lineKey(line)} class="flex gap-3.5 border-b border-[#ededed] py-3.5">
+            <li key={lineKey(line)} class="rise flex gap-3.5 border-b border-[#ededed] py-3.5" style={{ '--i': i }}>
               <div class="size-18 shrink-0 overflow-hidden rounded-2xl bg-surface">
                 {p.photos[0] ? (
                   <img src={p.photos[0]} alt="" width={72} height={72} class="size-full object-cover" loading="lazy" />

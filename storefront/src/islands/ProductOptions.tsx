@@ -97,8 +97,9 @@ export default function ProductOptions(p: Props) {
       <div class="fixed inset-x-0 bottom-0 z-20 bg-white/95 px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] backdrop-blur md:static md:mt-8 md:bg-transparent md:p-0 md:backdrop-blur-none">
         {message && (
           <div
+            key={message.text}
             role="status"
-            class={`mb-3 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm ${message.added ? 'bg-ink text-white' : 'bg-surface text-ink-deep'}`}
+            class={`rise mb-3 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm ${message.added ? 'bg-ink text-white' : 'bg-surface text-ink-deep'}`}
           >
             <span>{message.text}</span>
             {message.added && (

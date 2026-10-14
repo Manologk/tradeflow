@@ -1,28 +1,142 @@
 ---
 import FavouriteButton from '../islands/FavouriteButton';
+import { kwacha } from '../lib/money';
 import { canOrder, type ShopProduct } from '../lib/models';
 import Availability from './Availability.astro';
+import Icon from './Icon.astro';
 import Price from './Price.astro';
 import ProductPhoto from './ProductPhoto.astro';
 
 interface Props {
   product: ShopProduct;
   seriesName?: string | null;
+  /** Position in the grid, for the staggered entrance. */
+  index?: number;
 }
-const { product, seriesName } = Astro.props;
+const { product, seriesName, index = 0 } = Astro.props;
+const orderable = canOrder(product);
+// Colours need the product page; sizes can be picked right on the card.
+const quick = orderable && product.colors.length === 0;
 ---
-<li class="relative">
+<li class="group rise reveal relative" style={`--i: ${index}`}>
   <a href={`/p/${product.id}`} class="block">
-    <div class={`relative aspect-[0.82] overflow-hidden rounded-[20px] bg-surface ${canOrder(product) ? '' : 'opacity-50'}`}>
-      <ProductPhoto product={product} />
+    <div
+      class={`relative aspect-[0.82] overflow-hidden rounded-[20px] bg-surface transition-[box-shadow,translate] duration-500 ease-(--ease-fluid) group-hover:-translate-y-1 group-hover:shadow-[0_22px_40px_-20px_rgba(18,17,17,0.55)] ${orderable ? '' : 'opacity-50'}`}
+      style={`view-transition-name: photo-${product.id}`}
+    >
+      <ProductPhoto product={product} class="transition-transform duration-700 ease-(--ease-fluid) group-hover:scale-[1.07]" />
     </div>
-    <p class="mt-2.5 line-clamp-2 leading-tight font-semibold">{product.name}</p>
+    <p class="mt-2.5 line-clamp-2 leading-tight font-semibold transition-colors duration-300 group-hover:text-brand-deep">{product.name}</p>
     {seriesName && <p class="text-xs text-grey-light">{seriesName}</p>}
     <p class="mt-1.5"><Price product={product} /></p>
     <Availability product={product} compact />
   </a>
+
   <!-- Outside the link so tapping the heart never opens the product. -->
-  <span class="absolute top-2.5 right-2.5">
+  <span class="absolute top-2.5 right-2.5 z-10">
     <FavouriteButton productId={product.id} client:visible />
   </span>
+
+  {
+    quick && (
+      // Quick buy: slides up over the photo on hover (or keyboard focus).
+      // Devices without hover open the product page instead.
+      <div class="pointer-events-none absolute inset-x-0 top-0 aspect-[0.82]">
+        <div
+          data-quick={product.id}
+          data-needs-size={product.sizes.length > 0 ? '1' : undefined}
+          class="pointer-events-none absolute inset-x-2 bottom-2 translate-y-4 rounded-2xl bg-white/90 p-2 opacity-0 shadow-[0_10px_30px_-12px_rgba(18,17,17,0.5)] backdrop-blur-md transition duration-500 ease-(--ease-fluid) group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100"
+        >
+          {product.sizes.length > 0 && (
+            <div data-qb-sizes class="mb-2 flex flex-wrap justify-center gap-1" role="group" aria-label={`Size for ${product.name}`}>
+              {product.sizes.map((s) => (
+                <button
+                  type="button"
+                  data-qb-size={s}
+                  aria-pressed="false"
+                  aria-label={`Size ${s}`}
+                  class="h-7 min-w-7 rounded-full border border-line bg-white px-1.5 text-xs font-semibold transition duration-300 ease-(--ease-spring) hover:border-ink-deep active:scale-90 aria-pressed:scale-110 aria-pressed:border-brand aria-pressed:bg-brand"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <p data-qb-hint class="mb-1.5 hidden text-center text-xs font-semibold text-brand-deep" aria-live="polite">
+            Pick a size first
+          </p>
+          <div class="flex gap-1.5">
+            <button
+              type="button"
+              data-qb-buy
+              class="flex h-9 flex-1 items-center justify-center rounded-full bg-brand text-sm font-bold text-ink-deep transition duration-300 ease-(--ease-fluid) hover:brightness-105 active:scale-95"
+            >
+              Buy now · {kwacha(product.priceZmw)}
+            </button>
+            <button
+              type="button"
+              data-qb-add
+              aria-label={`Add ${product.name} to cart`}
+              class="qb-add grid size-9 shrink-0 place-items-center rounded-full bg-ink-deep text-white transition duration-300 ease-(--ease-spring) hover:scale-110 active:scale-90"
+            >
+              <Icon name="plus" size={18} class="qb-plus" />
+              <Icon name="check" size={18} class="qb-done hidden" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 </li>
+
+<style is:global>
+  .qb-add.is-added { background: var(--color-brand); color: var(--color-ink-deep); animation: var(--animate-pop); }
+  .qb-add.is-added .qb-plus { display: none; }
+  .qb-add.is-added .qb-done { display: block; }
+</style>
+
+<script>
+  import { cart } from '../islands/store';
+
+  // One listener for every card's quick-buy panel.
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    const button = target.closest<HTMLButtonElement>('[data-qb-size], [data-qb-buy], [data-qb-add]');
+    const panel = button?.closest<HTMLElement>('[data-quick]');
+    if (!button || !panel) return;
+    const hint = panel.querySelector<HTMLElement>('[data-qb-hint]');
+
+    if (button.dataset.qbSize) {
+      for (const chip of panel.querySelectorAll('[data-qb-size]')) {
+        chip.setAttribute('aria-pressed', String(chip === button));
+      }
+      panel.dataset.size = button.dataset.qbSize;
+      hint?.classList.add('hidden');
+      return;
+    }
+
+    const size = panel.dataset.size ?? null;
+    if (panel.dataset.needsSize && !size) {
+      hint?.classList.remove('hidden');
+      const sizes = panel.querySelector<HTMLElement>('[data-qb-sizes]');
+      sizes?.classList.remove('shake');
+      void sizes?.offsetWidth; // restart the shake
+      sizes?.classList.add('shake');
+      return;
+    }
+
+    cart.add({ productId: panel.dataset.quick!, size, color: null, qty: 1 });
+    if (button.hasAttribute('data-qb-buy')) {
+      window.location.href = '/cart';
+      return;
+    }
+    button.classList.remove('is-added');
+    void button.offsetWidth;
+    button.classList.add('is-added');
+    button.setAttribute('aria-label', 'Added to cart');
+    window.setTimeout(() => {
+      button.classList.remove('is-added');
+      button.setAttribute('aria-label', 'Add to cart');
+    }, 1600);
+  });
+</script>

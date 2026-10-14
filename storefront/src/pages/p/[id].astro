@@ -30,7 +30,7 @@ const photoCount = Math.max(1, product?.photos.length ?? 0);
     product && (
       <article class="px-5 pt-3 pb-32 md:grid md:grid-cols-2 md:items-start md:gap-10 md:px-8 md:pt-8 md:pb-16">
         <div class="relative md:sticky md:top-8">
-          <div class="flex aspect-[0.85] snap-x snap-mandatory overflow-x-auto rounded-[28px] [scrollbar-width:none]">
+          <div class="flex aspect-[0.85] snap-x snap-mandatory overflow-x-auto rounded-[28px] [scrollbar-width:none]" style={`view-transition-name: photo-${product.id}`}>
             {Array.from({ length: photoCount }, (_, i) => (
               <div class="h-full w-full shrink-0 snap-center">
                 <ProductPhoto product={product} index={i} eager={i === 0} />
@@ -51,9 +51,9 @@ const photoCount = Math.max(1, product?.photos.length ?? 0);
         </div>
 
         <div>
-        <h1 class="display mt-6 text-4xl leading-none text-balance md:mt-0 md:text-5xl">{product.name}</h1>
-        <p class="mt-1.5 muted">{[series?.name, category?.name].filter(Boolean).join(' · ')}</p>
-        <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+        <h1 class="display rise mt-6 text-4xl leading-none text-balance md:mt-0 md:text-5xl">{product.name}</h1>
+        <p class="rise mt-1.5 muted" style="--i: 1">{[series?.name, category?.name].filter(Boolean).join(' · ')}</p>
+        <div class="rise mt-2 flex flex-wrap items-center justify-between gap-2" style="--i: 2">
           <Price product={product} large />
           <Availability product={product} />
         </div>
