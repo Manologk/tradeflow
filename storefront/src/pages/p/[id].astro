@@ -77,6 +77,7 @@ const photoCount = Math.max(1, product?.photos.length ?? 0);
             priceZmw={product.priceZmw}
             compareAtZmw={product.compareAtZmw}
             sizes={product.sizes}
+            soldOutSizes={product.soldOutSizes}
             colors={product.colors}
             preOrder={product.availability === 'preOrder'}
             canOrder={canOrder(product)}

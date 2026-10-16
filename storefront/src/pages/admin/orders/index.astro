@@ -1,0 +1,70 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { STATUS, when } from '../../../lib/admin/format';
+import { orderOwed, orderTotal } from '../../../lib/admin/types';
+import type { OrderStatus } from '../../../lib/models';
+import { kwacha } from '../../../lib/money';
+
+const admin = Astro.locals.admin!;
+const params = Astro.url.searchParams;
+const owedOnly = params.get('owed') === '1';
+const raw = params.get('status');
+const status = (['received', 'confirmed', 'ready', 'delivered', 'cancelled', 'open'] as const).find((s) => s === raw);
+
+const tabs = [
+  { label: 'New', href: '?status=received', on: status === 'received' },
+  { label: 'To deliver', href: '?status=open', on: status === 'open' },
+  { label: 'Delivered', href: '?status=delivered', on: status === 'delivered' },
+  { label: 'Owing', href: '?owed=1', on: owedOnly },
+  { label: 'Cancelled', href: '?status=cancelled', on: status === 'cancelled' },
+  { label: 'All', href: '?', on: !status && !owedOnly },
+];
+
+let orders = await admin.orders({ status, limit: owedOnly ? 300 : 150 });
+if (status === 'open') orders = orders.filter((o) => o.status !== 'received');
+if (owedOnly) orders = orders.filter((o) => (['confirmed', 'ready', 'delivered'] as OrderStatus[]).includes(o.status) && orderOwed(o) > 0);
+---
+<Admin title="Orders" tab="orders">
+  <div class="flex items-end justify-between gap-3">
+    <h1 class="display text-4xl">Orders</h1>
+    <a href="/admin/sales/new" class="rounded-full bg-brand px-4 py-2 text-sm font-bold text-ink-deep">+ New sale</a>
+  </div>
+
+  <nav aria-label="Order status" class="mt-4 -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0">
+    {tabs.map((t) => <a href={t.href} class={`pill ${t.on ? 'pill-on' : ''}`} aria-current={t.on ? 'page' : undefined}>{t.label}</a>)}
+  </nav>
+
+  {
+    orders.length === 0 ? (
+      <p class="mt-10 text-center muted">No orders here.</p>
+    ) : (
+      <ul class="mt-4 grid gap-2.5">
+        {orders.map((o, i) => (
+          <li class="rise" style={`--i: ${i}`}>
+            <a href={`/admin/orders/${o.code}`} class="flex items-center gap-3 rounded-3xl bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-16px_rgba(18,17,17,0.5)]">
+              <span class="min-w-0 flex-1">
+                <span class="flex flex-wrap items-center gap-2">
+                  <span class={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS[o.status].tone}`}>{STATUS[o.status].label}</span>
+                  <span class="font-semibold">{o.customerName}</span>
+                  {o.source === 'shop' && <span class="rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold">In person</span>}
+                </span>
+                <span class="mt-1 block truncate text-sm muted">
+                  {o.items.map((it) => `${it.qty}× ${it.name}${it.size ? ` (${it.size})` : ''}`).join(', ')}
+                </span>
+                <span class="block text-xs text-grey-light">{o.code} · {when(o.createdAt)}</span>
+              </span>
+              <span class="text-right">
+                <span class="figure block text-xl">{kwacha(orderTotal(o))}</span>
+                {o.status !== 'cancelled' && o.status !== 'received' && (orderOwed(o) > 0 ? (
+                  <span class="block text-xs font-semibold text-sale">owes {kwacha(orderOwed(o))}</span>
+                ) : (
+                  <span class="block text-xs font-semibold text-[#1f6f43]">Paid</span>
+                ))}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Admin>

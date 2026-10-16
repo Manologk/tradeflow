@@ -52,6 +52,8 @@
   .muted { @apply text-grey; }
   /* Bangers has one weight, so no bold on top of it. */
   .display { @apply font-display font-normal tracking-wide; }
+  /* Numbers in the dashboard: plain and tabular, so 0 never reads as O. */
+  .figure { @apply font-sans font-bold tracking-tight tabular-nums; }
 }
 
 /* Motion ------------------------------------------------------------------ */

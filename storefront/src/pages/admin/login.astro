@@ -1,0 +1,51 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { getAuthBackend, writeSession } from '../../lib/admin/auth';
+import { AdminError } from '../../lib/admin/types';
+
+// Only paths inside the dashboard are allowed as "next", never another site.
+const rawNext = Astro.url.searchParams.get('next') ?? '/admin';
+const next = rawNext.startsWith('/admin') && !rawNext.startsWith('//') ? rawNext : '/admin';
+let error = '';
+let email = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  email = String(form.get('email') ?? '');
+  const backend = getAuthBackend();
+  if (!backend) {
+    error = 'The shop isn’t connected to its database yet.';
+  } else {
+    try {
+      const session = await backend.signIn(email, String(form.get('password') ?? ''));
+      if (!(await backend.isOwner(session.accessToken))) {
+        error = 'This account isn’t the shop owner.';
+      } else {
+        writeSession(Astro.cookies, session, Astro.url.protocol === 'https:');
+        return Astro.redirect(next, 303);
+      }
+    } catch (e) {
+      error = e instanceof AdminError ? e.message : 'Couldn’t sign in. Check your connection and try again.';
+    }
+  }
+}
+---
+<Admin title="Sign in">
+  <div class="mx-auto mt-6 max-w-sm rounded-[28px] bg-white p-6 shadow-[0_10px_30px_-18px_rgba(18,17,17,0.5)] md:mt-12">
+    <img src="/brand/icon-192.png" alt="" width="56" height="56" class="size-14 rounded-2xl" />
+    <h1 class="display mt-4 text-3xl">Sign in</h1>
+    <p class="mt-1 muted">Shop owner only.</p>
+    {error && <p role="alert" class="mt-4 rounded-xl bg-[#fdecec] px-3 py-2.5 text-sm font-semibold text-sale">{error}</p>}
+    <form method="post" class="mt-5 grid gap-3">
+      <label class="grid gap-1">
+        <span class="text-sm font-semibold">Email</span>
+        <input name="email" type="email" autocomplete="username" required class="field" value={email} />
+      </label>
+      <label class="grid gap-1">
+        <span class="text-sm font-semibold">Password</span>
+        <input name="password" type="password" autocomplete="current-password" required class="field" />
+      </label>
+      <button class="btn-primary mt-2">Sign in</button>
+    </form>
+  </div>
+</Admin>

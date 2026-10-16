@@ -36,6 +36,19 @@ row-level security limits that key to the published catalog and the two order fu
 
 Without shop settings in the database the site shows "Opening soon" instead of breaking.
 
+## Admin dashboard
+
+`/admin` is the owner's dashboard: sales and money summary, orders inbox (confirm → ready →
+delivered, payments in cash or mobile money, part payments), **New sale** for WhatsApp and walk-in
+sales, and products with stock per size and photos. Confirming a sale takes stock off; cancelling
+puts it back; the website greys out sold-out sizes and shows "Few left" / "Sold out" by itself.
+
+Sign-in uses Supabase Auth. Only accounts listed in `shop_owners` get in. To add the owner:
+create the user in Supabase → Authentication → Users (tick Auto Confirm), then run
+`insert into public.shop_owners select id from auth.users where email = '<their email>';`
+
+With the test catalog (`SHOP_DATA=fixtures`) the test login is `owner@animeyay.test` / `otaku-admin`.
+
 ## Database
 
 Schema, security rules and order functions: [`../supabase/migrations`](../supabase/migrations).

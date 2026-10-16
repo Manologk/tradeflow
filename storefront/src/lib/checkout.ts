@@ -15,6 +15,7 @@ export function priceLines(cart: CartLine[], catalog: Catalog): OrderLine[] {
   for (const line of cart) {
     const p = catalog.products.find((x) => x.id === line.productId);
     if (!p || !canOrder(p) || line.qty < 1) continue;
+    if (line.size && p.soldOutSizes.includes(line.size)) continue;
     lines.push({
       productId: p.id,
       name: p.name,

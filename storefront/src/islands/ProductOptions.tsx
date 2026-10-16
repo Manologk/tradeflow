@@ -11,6 +11,7 @@ interface Props {
   priceZmw: number;
   compareAtZmw: number | null;
   sizes: string[];
+  soldOutSizes: string[];
   colors: ShopColor[];
   preOrder: boolean;
   canOrder: boolean;
@@ -51,15 +52,16 @@ export default function ProductOptions(p: Props) {
                   <button
                     key={s}
                     type="button"
+                    disabled={p.soldOutSizes.includes(s)}
                     aria-pressed={size === s}
-                    aria-label={`Size ${s}`}
+                    aria-label={p.soldOutSizes.includes(s) ? `Size ${s}, sold out` : `Size ${s}`}
                     onClick={() => {
                       setSize(s);
                       setMessage(null);
                     }}
                     class={`grid h-10 min-w-10 place-items-center rounded-full border px-2 text-sm font-semibold ${
                       size === s ? 'border-brand bg-brand text-ink-deep' : 'border-line bg-white'
-                    }`}
+                    } disabled:border-dashed disabled:text-grey-light disabled:line-through`}
                   >
                     {s}
                   </button>

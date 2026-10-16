@@ -94,7 +94,7 @@ export default function Checkout({ catalog }: { catalog: Catalog }) {
       <ul>
         {lines.map((line, i) => {
           const p = productOf(line.productId);
-          if (!p || p.availability === 'soldOut') return null;
+          if (!p || p.availability === 'soldOut' || (line.size && p.soldOutSizes.includes(line.size))) return null;
           const options = [line.size ? `Size ${line.size}` : null, line.color, p.availability === 'preOrder' ? 'Pre-order' : null]
             .filter(Boolean)
             .join(' · ');

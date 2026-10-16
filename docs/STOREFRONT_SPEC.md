@@ -101,8 +101,8 @@ Added in the same style:
 |---|---|---|
 | S-M1 ✅ | Storefront UI behind a catalog/order interface | All screens built to the design; cart & WhatsApp message work (tested with test fixtures) |
 | S-M2 ✅ | Supabase schema + RLS + storage | Catalog readable anonymously; orders insertable; security tests pass |
-| S-M3 | Admin: shop fields, lists, publish to cloud | Products with photos appear on the site |
-| S-M4 | Orders into admin | Website order shows in admin inbox; confirm creates sale; status visible in "My orders" |
+| S-M3 ✅ | Web admin dashboard (/admin) | Owner signs in; products, photos, stock per size, orders inbox, in-person sales, payments, sales summary |
+| S-M4 ✅ | Orders into admin | Website order shows in admin inbox; confirm creates sale and takes stock; status visible in "My orders" |
 | S-M5 | Deploy | Site live on Cloudflare with a shareable link |
 
 ## 9. Needed from the owner

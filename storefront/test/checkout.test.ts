@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { flash, kwachaInput, parseKwacha, slugify } from '../src/lib/admin/format';
 import { buildOrder, depositFor, localPhone, newOrderCode, normalisePhone, priceLines, totalsFor, whatsappLink, whatsappMessage } from '../src/lib/checkout';
 import { cachedCatalog, ShopNotConfigured, type ShopData } from '../src/lib/data';
 import { supabaseShop } from '../src/lib/supabase';
@@ -150,5 +151,22 @@ describe('supabaseShop', () => {
     await expect(supabaseShop('https://x.supabase.co', 'key', fetchFn).loadCatalog()).rejects.toBeInstanceOf(
       ShopNotConfigured,
     );
+  });
+});
+
+describe('admin helpers', () => {
+  it('puts form messages before the section anchor', () => {
+    expect(flash('/admin/products/p1#stock', 'ok', 'Saved')).toBe('/admin/products/p1?ok=Saved#stock');
+    expect(flash('/admin/orders?status=open', 'err', 'No')).toBe('/admin/orders?status=open&err=No');
+  });
+  it('reads kwacha amounts as typed', () => {
+    expect(parseKwacha('250')).toBe(25000);
+    expect(parseKwacha('K1,250.50')).toBe(125050);
+    expect(parseKwacha('0')).toBeNull();
+    expect(parseKwacha('abc')).toBeNull();
+    expect(kwachaInput(25050)).toBe('250.50');
+  });
+  it('makes readable product addresses', () => {
+    expect(slugify('Nezuko Kamado Jersey!')).toBe('nezuko-kamado-jersey');
   });
 });

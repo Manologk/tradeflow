@@ -1,0 +1,96 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  title: string;
+  tab?: 'home' | 'orders' | 'sale' | 'products' | null;
+}
+const { title, tab = null } = Astro.props;
+const email = Astro.locals.adminEmail;
+// Messages from the last form ("?ok=Saved", "?err=Not enough stock").
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+
+const nav = [
+  { id: 'home', href: '/admin', label: 'Home', icon: 'home' },
+  { id: 'orders', href: '/admin/orders', label: 'Orders', icon: 'receipt' },
+  { id: 'sale', href: '/admin/sales/new', label: 'New sale', icon: 'plus' },
+  { id: 'products', href: '/admin/products', label: 'Products', icon: 'bag' },
+] as const;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#121111" />
+    <title>{title} · AnimeYay Admin</title>
+    <link rel="icon" href="/brand/icon-48.png" sizes="48x48" type="image/png" />
+    <link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/bangers-400.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body class="bg-backdrop">
+    <header class="sticky top-0 z-20 bg-ink-deep text-white">
+      <div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-8">
+        <a href="/admin" class="flex items-center gap-2.5">
+          <img src="/brand/icon-192.png" alt="" width="36" height="36" class="size-9 rounded-xl" />
+          <span class="display text-2xl">Admin</span>
+        </a>
+        <nav aria-label="Dashboard" class="ml-6 hidden gap-1 md:flex">
+          {
+            nav.map((n) => (
+              <a
+                href={n.href}
+                aria-current={tab === n.id ? 'page' : undefined}
+                class={`rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-white/10 ${tab === n.id ? 'bg-brand text-ink-deep hover:bg-brand' : ''}`}
+              >
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+        <div class="ml-auto flex items-center gap-2">
+          <a href="/" target="_blank" class="hidden rounded-full px-3 py-2 text-sm text-white/80 hover:text-white sm:block">View shop ↗</a>
+          {
+            email !== undefined && (
+              <form method="post" action="/admin/logout">
+                <button class="rounded-full border border-white/25 px-3 py-1.5 text-sm hover:border-white" title={email}>
+                  Sign out
+                </button>
+              </form>
+            )
+          }
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-16">
+      {ok && <p role="status" class="rise mb-4 rounded-2xl bg-[#e8f5ec] px-4 py-3 text-sm font-semibold text-[#1f6f43]">{ok}</p>}
+      {err && <p role="alert" class="rise mb-4 rounded-2xl bg-[#fdecec] px-4 py-3 text-sm font-semibold text-sale">{err}</p>}
+      <slot />
+    </main>
+
+    {
+      tab !== null && (
+        <nav aria-label="Dashboard" class="fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(14px,env(safe-area-inset-bottom))] md:hidden">
+          <div class="mx-auto flex max-w-md items-center justify-around rounded-full bg-ink-deep px-2 py-2 shadow-[0_8px_20px_rgba(0,0,0,0.25)]">
+            {nav.map((n) => (
+              <a
+                href={n.href}
+                aria-current={tab === n.id ? 'page' : undefined}
+                class={`flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${
+                  n.id === 'sale' ? 'bg-brand text-ink-deep' : tab === n.id ? 'text-brand' : 'text-white/80'
+                }`}
+              >
+                <Icon name={n.icon} size={20} />
+                {n.label}
+              </a>
+            ))}
+          </div>
+        </nav>
+      )
+    }
+  </body>
+</html>

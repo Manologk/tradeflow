@@ -1,0 +1,64 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { AVAILABILITY } from '../../../lib/admin/format';
+import { stockTotal } from '../../../lib/admin/types';
+import { kwacha } from '../../../lib/money';
+
+const admin = Astro.locals.admin!;
+const q = (Astro.url.searchParams.get('q') ?? '').trim().toLowerCase();
+const [products, { categories }] = await Promise.all([admin.products(), admin.lists()]);
+const shown = products.filter((p) => !q || p.name.toLowerCase().includes(q));
+const categoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? id;
+const tone = { inStock: 'text-[#1f6f43]', fewLeft: 'text-brand-deep', preOrder: 'text-ink-deep', soldOut: 'text-sale' } as const;
+---
+<Admin title="Products" tab="products">
+  <div class="flex items-end justify-between gap-3">
+    <h1 class="display text-4xl">Products</h1>
+    <a href="/admin/products/new" class="rounded-full bg-brand px-4 py-2 text-sm font-bold text-ink-deep">+ Add product</a>
+  </div>
+  <form class="mt-4 md:max-w-md" role="search">
+    <input type="search" name="q" value={q} placeholder="Search products…" aria-label="Search products" class="field" />
+  </form>
+
+  <ul class="mt-4 grid gap-2.5 md:grid-cols-2">
+    {
+      shown.map((p, i) => {
+        const keys = p.sizes.length ? p.sizes : [''];
+        return (
+          <li class="rise" style={`--i: ${i}`}>
+            <a href={`/admin/products/${p.id}`} class="flex gap-3 rounded-3xl bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-16px_rgba(18,17,17,0.5)]">
+              <span class="size-20 shrink-0 overflow-hidden rounded-2xl bg-surface">
+                {p.photos[0] && <img src={p.photos[0]} alt="" class="size-full object-cover" loading="lazy" />}
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-start justify-between gap-2">
+                  <span class="truncate font-semibold">{p.name}</span>
+                  <span class="figure shrink-0">{kwacha(p.priceZmw)}</span>
+                </span>
+                <span class="block text-xs muted">
+                  {categoryName(p.categoryId)}
+                  {!p.published && <span class="ml-1 rounded-full bg-surface px-2 py-0.5 font-semibold text-ink-deep">Hidden</span>}
+                </span>
+                <span class={`mt-1 block text-sm font-semibold ${tone[p.availability]}`}>
+                  {AVAILABILITY[p.availability]}
+                  {p.trackStock && p.availability !== 'preOrder' && <span class="font-normal muted"> · {stockTotal(p)} in stock</span>}
+                </span>
+                {p.trackStock && p.sizes.length > 0 && (
+                  <span class="mt-1 flex flex-wrap gap-1">
+                    {keys.map((k) => (
+                      <span class={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${(p.stock[k] ?? 0) === 0 ? 'bg-[#fdecec] text-sale' : 'bg-surface'}`}>
+                        {k} {p.stock[k] ?? 0}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                {!p.trackStock && <span class="block text-xs text-grey-light">Stock not counted yet</span>}
+              </span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+  {shown.length === 0 && <p class="mt-10 text-center muted">No products found.</p>}
+</Admin>

@@ -1,0 +1,23 @@
+---
+import SaleBuilder, { type SaleProduct } from '../../../islands/admin/SaleBuilder';
+import Admin from '../../../layouts/Admin.astro';
+
+const products = await Astro.locals.admin!.products();
+const forSale: SaleProduct[] = products.map((p) => ({
+  id: p.id,
+  name: p.name,
+  priceZmw: p.priceZmw,
+  photo: p.photos[0] ?? null,
+  sizes: p.sizes,
+  trackStock: p.trackStock,
+  preOrder: p.availability === 'preOrder',
+  stock: p.stock,
+}));
+---
+<Admin title="New sale" tab="sale">
+  <h1 class="display text-4xl">New sale</h1>
+  <p class="mt-1 muted">For WhatsApp, walk-in or any sale not made on the website. Stock goes down automatically.</p>
+  <div class="mt-4">
+    <SaleBuilder products={forSale} client:load />
+  </div>
+</Admin>

@@ -21,6 +21,8 @@ export interface ShopProduct {
   compareAtZmw: number | null;
   photos: string[];
   sizes: string[];
+  /** Sizes with no stock left (the website greys these out). */
+  soldOutSizes: string[];
   colors: ShopColor[];
   availability: Availability;
   /** For pre-orders: roughly how long until it arrives. */

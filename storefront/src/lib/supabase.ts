@@ -23,6 +23,7 @@ interface ProductRow {
   compare_at_zmw: number | null;
   photos: string[] | null;
   sizes: string[] | null;
+  sold_out_sizes: string[] | null;
   colors: ShopColor[] | null;
   availability: Availability;
   lead_time_weeks: number | null;
@@ -79,6 +80,7 @@ export function supabaseShop(url: string, anonKey: string, fetchFn: typeof fetch
           compareAtZmw: p.compare_at_zmw,
           photos: p.photos ?? [],
           sizes: p.sizes ?? [],
+          soldOutSizes: p.sold_out_sizes ?? [],
           colors: p.colors ?? [],
           availability: p.availability,
           leadTimeWeeks: p.lead_time_weeks,
